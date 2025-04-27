@@ -1,0 +1,9 @@
+Huge Thanks to Python for being the programming language used in this game.
+https://www.python.org/
+
+Huge thanks to Arcade and Pyglet for being the graphical engines used in this game.
+https://arcade.academy/
+https://pyglet.readthedocs.io/en/latest/
+
+Thanks to the following other libraries used in this game:
+pypresence - https://github.com/qwertyquerty/pypresence - Used for Discord Rich Presence

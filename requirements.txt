@@ -1,0 +1,3 @@
+Pillow
+git+https://github.com/pythonarcade/arcade.git@gui/controller
+pypresence
