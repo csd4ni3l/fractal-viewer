@@ -2,7 +2,7 @@ import copy, pypresence, json, os
 
 import arcade, arcade.gui
 
-from utils.constants import button_style, dropdown_style, slider_style, settings
+from utils.constants import button_style, dropdown_style, slider_style, settings, discord_presence_id
 from utils.utils import FakePyPresence
 from utils.preload import button_texture, button_hovered_texture
 
@@ -169,7 +169,7 @@ class Settings(arcade.gui.UIView):
                     self.pypresence_client.close()
                     del self.pypresence_client
                     try:
-                        self.pypresence_client = pypresence.Presence(1365949409254441000)
+                        self.pypresence_client = pypresence.Presence(discord_presence_id)
                         self.pypresence_client.connect()
                         self.pypresence_client.update(state='In Settings', details='Modifying Settings', start=start_time)
                         self.pypresence_client.start_time = start_time

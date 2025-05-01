@@ -1,6 +1,6 @@
 import arcade, arcade.gui, asyncio, pypresence, time, copy, json
 from utils.preload import button_texture, button_hovered_texture
-from utils.constants import big_button_style
+from utils.constants import big_button_style, discord_presence_id
 from utils.utils import FakePyPresence
 
 class Main(arcade.gui.UIView):
@@ -22,7 +22,7 @@ class Main(arcade.gui.UIView):
                 except:
                     asyncio.set_event_loop(asyncio.new_event_loop())
                 try:
-                    self.pypresence_client = pypresence.Presence(1365949409254441000)
+                    self.pypresence_client = pypresence.Presence(discord_presence_id)
                     self.pypresence_client.connect()
                     self.pypresence_client.start_time = time.time()
                 except:
@@ -33,7 +33,7 @@ class Main(arcade.gui.UIView):
                 # get start time from old object
                 start_time = copy.deepcopy(self.pypresence_client.start_time)
                 try:
-                    self.pypresence_client = pypresence.Presence(1365949409254441000)
+                    self.pypresence_client = pypresence.Presence(discord_presence_id)
                     self.pypresence_client.connect()
                     self.pypresence_client.start_time = start_time
                 except:
