@@ -40,7 +40,7 @@ if os.path.exists('settings.json'):
     else:
         antialiasing = 0
 
-    fullscreen = settings['window_mode'] == 'fullscreen'
+    fullscreen = settings['window_mode'] == 'Fullscreen'
     style = arcade.Window.WINDOW_STYLE_BORDERLESS if settings['window_mode'] == 'borderless' else arcade.Window.WINDOW_STYLE_DEFAULT
     vsync = settings['vsync']
     fps_limit = settings['fps_limit']
