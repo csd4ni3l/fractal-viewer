@@ -5,7 +5,7 @@ requires-python = ">=3.11"
 [[package]]
 name = "arcade"
 version = "3.1.0"
-source = { git = "https://github.com/pythonarcade/arcade.git?rev=gui%2Fcontroller#ed17c937dd6fa7ebc59a2f56971fe1e2596ad46e" }
+source = { git = "https://github.com/pythonarcade/arcade.git?rev=development#a17e95502bc0c7cd0527445e62bff84a49183c43" }
 dependencies = [
     { name = "pillow" },
     { name = "pyglet" },
@@ -78,7 +78,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "arcade", git = "https://github.com/pythonarcade/arcade.git?rev=gui%2Fcontroller" },
+    { name = "arcade", git = "https://github.com/pythonarcade/arcade.git?rev=development" },
     { name = "pypresence", specifier = ">=4.3.0" },
 ]
 

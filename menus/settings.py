@@ -2,7 +2,7 @@ import copy, pypresence, json, os
 
 import arcade, arcade.gui
 
-from utils.constants import button_style, dropdown_style, slider_style, settings, discord_presence_id
+from utils.constants import button_style, dropdown_style, slider_style, settings, discord_presence_id, settings_start_category
 from utils.utils import FakePyPresence
 from utils.preload import button_texture, button_hovered_texture
 
@@ -25,7 +25,7 @@ class Settings(arcade.gui.UIView):
         self.on_radiobuttons = {}
         self.off_radiobuttons = {}
 
-        self.current_category = "Mandelbrot"
+        self.current_category = settings_start_category
 
         self.modified_settings = {}
 
@@ -54,7 +54,7 @@ class Settings(arcade.gui.UIView):
 
         self.display_categories()
 
-        self.display_category("Mandelbrot")
+        self.display_category(settings_start_category)
 
     def display_categories(self):
         for category in settings:

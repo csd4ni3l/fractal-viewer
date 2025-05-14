@@ -43,3 +43,4 @@ settings = {
     },
     "Credits": {}
 }
+settings_start_category = "Mandelbrot"
