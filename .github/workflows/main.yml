@@ -32,7 +32,6 @@ jobs:
           nuitka-version: main
           script-name: run.py
           nofollow-import-to: "*tk*,_codecs,encodings,multiprocessing,gi"
-          include-package: arcade.gl.backends
           disable-plugins: tk-inter,dill-compat,eventlet,gevent,pyqt5,pyqt6,pyside2,pyside6,delvewheel,pywebview,matplotlib,spacy,enum-compat,pbr-compat,gevent,pmw-freezer,transformers,upx,kivy,options-nanny,multiprocessing,gi
           include-data-dir: assets=assets
           include-data-files: CREDITS=CREDITS
