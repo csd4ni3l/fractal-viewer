@@ -27,9 +27,13 @@ slider_style = {'normal': slider_default_style, 'hover': slider_hover_style, 'pr
 
 settings = {
     "Mandelbrot": {
-      "Float Precision": {"type": "option", "options": ["Single", "Double"], "config_key": "precision", "default": "Single"},
-      "Zoom Increase Per Click": {"type": "slider", "min": 2, "max": 100, "config_key": "zoom_increase", "default": 2},
-      "Max Iterations": {"type": "slider", "min": 100, "max": 10000, "config_key": "max_iter", "default": 200}
+        "Float Precision": {"type": "option", "options": ["Single", "Double"], "config_key": "mandelbrot_precision", "default": "Single"},
+        "Zoom Increase Per Click": {"type": "slider", "min": 2, "max": 100, "config_key": "mandelbrot_zoom_increase", "default": 2},
+        "Max Iterations": {"type": "slider", "min": 100, "max": 10000, "config_key": "mandelbrot_max_iter", "default": 200}
+    },
+    "Sierpinsky Carpet": {
+        "Zoom Increase Per Click": {"type": "slider", "min": 2, "max": 100, "config_key": "sierpinsky_zoom_increase", "default": 2},
+        "Depth": {"type": "slider", "min": 2, "max": 10000, "config_key": "sierpinsky_depth", "default": 10}
     },
     "Graphics": {
         "Window Mode": {"type": "option", "options": ["Windowed", "Fullscreen", "Borderless"], "config_key": "window_mode", "default": "Windowed"},

@@ -50,6 +50,43 @@ void main() {
 }
 """
 
+sierpinsky_carpet_compute_source = """#version 430 core
+
+uniform int u_depth;
+uniform int u_zoom;
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(location = 0, rgba32f) uniform image2D img_output;
+
+void main() {
+    ivec2 coord = ivec2(gl_GlobalInvocationID.xy);
+    bool isHole = false;
+
+    for (int i = 0; i < u_depth; ++i) {
+        if (coord.x % 3 == 1 && coord.y % 3 == 1) {
+            isHole = true;
+            break;
+        }
+        coord /= 3;
+    }
+
+    vec4 color = isHole ? vec4(0, 0, 0, 1) : vec4(1, 1, 1, 1);
+    imageStore(img_output, ivec2(gl_GlobalInvocationID.xy), color);
+}
+
+"""
+
+def create_sierpinsky_carpet_shader(width, height, precision="single"):
+    shader_source = sierpinsky_carpet_compute_source
+
+    shader_program = pyglet.graphics.shader.ComputeShaderProgram(shader_source)
+
+    sierpinsky_carpet_image = pyglet.image.Texture.create(width, height, internalformat=pyglet.gl.GL_RGBA32F)
+
+    uniform_location = shader_program['img_output']
+    sierpinsky_carpet_image.bind_image_texture(unit=uniform_location)
+
+    return shader_program, sierpinsky_carpet_image
+
 def create_mandelbrot_shader(width, height, precision="single"):
     shader_source = mandelbrot_compute_source
 

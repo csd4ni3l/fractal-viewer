@@ -17,9 +17,9 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          architecture: 'x64'
-          cache: 'pip'
+          python-version: "3.11"
+          architecture: "x64"
+          cache: "pip"
           cache-dependency-path: |
             **/requirements*.txt
 
@@ -37,24 +37,24 @@ jobs:
           include-data-dir: assets=assets
           include-data-files: CREDITS=CREDITS
           mode: standalone
-          output-file: MandelBrotViewer
-      
+          output-file: FractalViewer
+
       - name: Zip Build Output
         shell: bash
         run: |
           mkdir -p zip_output
           if [ "${{ runner.os }}" = "Windows" ]; then
-            powershell.exe -Command "Compress-Archive -Path 'build/run.dist/*' -DestinationPath 'zip_output/MandelBrotViewer-${{ runner.os }}.zip'"
+            powershell.exe -Command "Compress-Archive -Path 'build/run.dist/*' -DestinationPath 'zip_output/FractalViewer-${{ runner.os }}.zip'"
           else
             cd build/run.dist
-            zip -r "../../zip_output/MandelBrotViewer-${{ runner.os }}.zip" .
+            zip -r "../../zip_output/FractalViewer-${{ runner.os }}.zip" .
           fi
 
       - name: Upload Zipped Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MandelBrotViewer-${{ runner.os }}.zip
-          path: zip_output/MandelBrotViewer-${{ runner.os }}.zip
+          name: FractalViewer-${{ runner.os }}.zip
+          path: zip_output/FractalViewer-${{ runner.os }}.zip
   release:
     name: Create GitHub Release
     needs: build
@@ -63,31 +63,31 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
-  
+          fetch-depth: 0
+
       - name: Download All Zipped Builds
         uses: actions/download-artifact@v4
         with:
           path: downloads
-  
+
       - name: Delete Old Release (if exists)
         continue-on-error: true
         run: gh release delete latest -y
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
+
       - name: Delete Git tag (if exists)
         continue-on-error: true
         run: |
           git push origin :refs/tags/latest
           git tag -d latest
-  
+
       - name: Recreate Git tag at HEAD
         run: |
           git tag latest
           git push origin latest
-  
+
       - name: Create the new release
-        run: gh release create latest downloads/**/MandelBrotViewer-*.zip --title "Latest Build" --notes "Most recent multi-platform builds of MandelBrotViewer"
+        run: gh release create latest downloads/**/FractalViewer-*.zip --title "Latest Build" --notes "Most recent multi-platform builds of FractalViewer"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,10 +1,10 @@
 [project]
-name = "MandelbrotViewer"
+name = "FractalViewer"
 version = "0.1.0"
-description = "Mandelbrot viewer in Python using compute shaders and the Arcade and Pyglet modules."
+description = "Fractal viewer in Python using compute shaders and the Arcade and Pyglet modules."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["arcade", "pypresence>=4.3.0"]
-
-[tool.uv.sources]
-arcade = { git = "https://github.com/pythonarcade/arcade.git", rev = "development" }
+dependencies = [
+ "arcade==3.2.0",
+ "pypresence>=4.3.0",
+]

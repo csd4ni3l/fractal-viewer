@@ -64,7 +64,7 @@ else:
     with open("settings.json", "w") as file:
         file.write(json.dumps(settings))
 
-window = arcade.Window(width=resolution[0], height=resolution[1], title='Mandelbrot Viewer', samples=antialiasing, antialiasing=antialiasing > 0, fullscreen=fullscreen, vsync=vsync, resizable=False, style=style)
+window = arcade.Window(width=resolution[0], height=resolution[1], title='Fractal Viewer', samples=antialiasing, antialiasing=antialiasing > 0, fullscreen=fullscreen, vsync=vsync, resizable=False, style=style)
 
 if vsync:
     window.set_vsync(True)

@@ -4,13 +4,17 @@ requires-python = ">=3.11"
 
 [[package]]
 name = "arcade"
-version = "3.1.0"
-source = { git = "https://github.com/pythonarcade/arcade.git?rev=development#a17e95502bc0c7cd0527445e62bff84a49183c43" }
+version = "3.2.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pillow" },
     { name = "pyglet" },
     { name = "pymunk" },
     { name = "pytiled-parser" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e5/39/87eaffdfc50ec9d4b4573652ef8b80cca0592e5ccafb5fc5bc8612b1445d/arcade-3.2.0.tar.gz", hash = "sha256:1c2c56181560665f6542157b9ab316b9551274a9ee8468bae017ed5b8fee18fd", size = 41941030, upload_time = "2025-05-09T20:16:20.112Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/40/9a/ac86f5cbccfe5455a28308fcf2d7179af8d9c3087ad4eb45706c2a7b089b/arcade-3.2.0-py3-none-any.whl", hash = "sha256:7bb47cf643b43272e4300d8a5ca5f1b1e9e131b0f3f1d3fad013cb29528d3062", size = 42635264, upload_time = "2025-05-09T20:16:15.98Z" },
 ]
 
 [[package]]
@@ -68,7 +72,7 @@ wheels = [
 ]
 
 [[package]]
-name = "mandelbrotviewer"
+name = "fractalviewer"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
@@ -78,7 +82,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "arcade", git = "https://github.com/pythonarcade/arcade.git?rev=development" },
+    { name = "arcade", specifier = "==3.2.0" },
     { name = "pypresence", specifier = ">=4.3.0" },
 ]
 
