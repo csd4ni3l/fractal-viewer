@@ -22,7 +22,7 @@ class SierpinskyCarpetViewer(arcade.gui.UIView):
     def on_show_view(self):
         super().on_show_view()
 
-        self.shader_program, self.sierpinsky_carpet_image = create_sierpinsky_carpet_shader(self.window.width, self.window.height, self.settings_dict.get("precision", "Single").lower())
+        self.shader_program, self.sierpinsky_carpet_image = create_sierpinsky_carpet_shader(self.window.width, self.window.height, self.settings_dict.get("sierpinsky_precision", "Single").lower())
 
         self.sierpinsky_carpet_sprite = pyglet.sprite.Sprite(img=self.sierpinsky_carpet_image)
 
@@ -50,9 +50,8 @@ class SierpinskyCarpetViewer(arcade.gui.UIView):
     def create_image(self):
         with self.shader_program:
             self.shader_program['u_depth'] = self.depth
-            #self.shader_program['u_zoom'] = int(self.zoom)
-            #self.shader_program['u_resolution'] = self.window.size
-            #self.shader_program['u_center'] = self.click_center
+            self.shader_program['u_zoom'] = int(self.zoom)
+            self.shader_program['u_center'] = self.click_center
             self.shader_program.dispatch(self.sierpinsky_carpet_image.width, self.sierpinsky_carpet_image.height, 1, barrier=pyglet.gl.GL_ALL_BARRIER_BITS)
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> bool | None:
@@ -73,7 +72,7 @@ class SierpinskyCarpetViewer(arcade.gui.UIView):
 
         self.create_image()
 
-        self.pypresence_client.update(state='Viewing Sierpinsky Carpet', details=f'Zoom: {self.zoom}\nMax Iterations: {self.depth}', start=self.pypresence_client.start_time)
+        self.pypresence_client.update(state='Viewing Sierpinsky Carpet', details=f'Zoom: {self.zoom}\nDepth: {self.depth}', start=self.pypresence_client.start_time)
 
     def on_draw(self):
         self.window.clear()

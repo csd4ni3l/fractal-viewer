@@ -29,6 +29,9 @@ class FractalChooser(arcade.gui.UIView):
         self.sierpinsky_carpet_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Sierpinsky Carpet', style=button_style, width=200, height=200), row=0, column=1)
         self.sierpinsky_carpet_button.on_click = lambda event: self.sierpinsky_carpet()
 
+        self.julia_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Julia', style=button_style, width=200, height=200), row=0, column=2)
+        self.julia_button.on_click = lambda event: self.julia()
+
     def main_exit(self):
         from menus.main import Main
         self.window.show_view(Main(self.pypresence_client))
@@ -40,3 +43,7 @@ class FractalChooser(arcade.gui.UIView):
     def sierpinsky_carpet(self):
         from game.sierpinsky_carpet import SierpinskyCarpetViewer
         self.window.show_view(SierpinskyCarpetViewer(self.pypresence_client))
+
+    def julia(self):
+        from game.julia import JuliaViewer
+        self.window.show_view(JuliaViewer(self.pypresence_client))

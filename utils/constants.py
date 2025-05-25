@@ -7,10 +7,17 @@ menu_background_color = (30, 30, 47)
 log_dir = 'logs'
 discord_presence_id = 1365949409254441000
 
-initial_real_min = -2.0
-initial_real_max = 1.0
-initial_imag_min = -1.0
-initial_imag_max = 1.0
+mandelbrot_initial_real_min = -2.0
+mandelbrot_initial_real_max = 1.0
+mandelbrot_initial_imag_min = -1.0
+mandelbrot_initial_imag_max = 1.0
+
+c_for_julia_type = {
+    "Classic swirling": (-0.7, 0.27015),
+    "Douady rabbit": (-0.123, 0.745),
+    "Nebula-style": (0.285, 0),
+    "Snowflake": (-0.8, 0.156)
+}
 
 button_style = {'normal': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK), 'hover': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK),
                 'press': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK), 'disabled': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK)}
@@ -32,8 +39,16 @@ settings = {
         "Max Iterations": {"type": "slider", "min": 100, "max": 10000, "config_key": "mandelbrot_max_iter", "default": 200}
     },
     "Sierpinsky Carpet": {
+        "Float Precision": {"type": "option", "options": ["Single", "Double"], "config_key": "sierpinsky_precision", "default": "Single"},
         "Zoom Increase Per Click": {"type": "slider", "min": 2, "max": 100, "config_key": "sierpinsky_zoom_increase", "default": 2},
         "Depth": {"type": "slider", "min": 2, "max": 10000, "config_key": "sierpinsky_depth", "default": 10}
+    },
+    "Julia": {
+        "Type": {"type": "option", "options": ["Classic swirling", "Douady rabbit", "Nebula-style", "Snowflake"], "config_key": "julia_type", "default": "Classic swirling"},
+        "Float Precision": {"type": "option", "options": ["Single", "Double"], "config_key": "julia_precision", "default": "Single"},
+        "Escape Radius": {"type": "slider", "min": 1, "max": 10, "config_key": "julia_escape_radius", "default": 2},
+        "Zoom Increase Per Click": {"type": "slider", "min": 2, "max": 100, "config_key": "julia_zoom_increase", "default": 2},
+        "Max Iterations": {"type": "slider", "min": 100, "max": 10000, "config_key": "julia_max_iter", "default": 200}
     },
     "Graphics": {
         "Window Mode": {"type": "option", "options": ["Windowed", "Fullscreen", "Borderless"], "config_key": "window_mode", "default": "Windowed"},
