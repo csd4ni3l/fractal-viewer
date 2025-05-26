@@ -49,7 +49,7 @@ class SierpinskyCarpetViewer(arcade.gui.UIView):
 
     def create_image(self):
         with self.shader_program:
-            self.shader_program['u_depth'] = self.depth
+            self.shader_program['u_depth'] = int(self.depth)
             self.shader_program['u_zoom'] = int(self.zoom)
             self.shader_program['u_center'] = self.click_center
             self.shader_program.dispatch(self.sierpinsky_carpet_image.width, self.sierpinsky_carpet_image.height, 1, barrier=pyglet.gl.GL_ALL_BARRIER_BITS)

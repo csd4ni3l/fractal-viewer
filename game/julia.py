@@ -37,7 +37,7 @@ class JuliaViewer(arcade.gui.UIView):
     def on_show_view(self):
         super().on_show_view()
 
-        self.shader_program, self.julia_image = create_julia_shader(self.window.width, self.window.height, self.settings_dict.get("julia_precision", "Single").lower(), self.settings_dict.get("julia_escape_radius", 2), self.settings_dict.get("julia_type", "Classic swirling"))
+        self.shader_program, self.julia_image = create_julia_shader(self.window.width, self.window.height, self.settings_dict.get("julia_precision", "Single").lower(), self.settings_dict.get("julia_escape_radius", 2), self.settings_dict.get("julia_type", "Classic swirling"), int(self.settings_dict.get("julia_n", 2)))
 
         self.julia_sprite = pyglet.sprite.Sprite(img=self.julia_image)
 
@@ -64,7 +64,7 @@ class JuliaViewer(arcade.gui.UIView):
 
     def create_image(self):
         with self.shader_program:
-            self.shader_program['u_maxIter'] = self.max_iter
+            self.shader_program['u_maxIter'] = int(self.max_iter)
             self.shader_program['u_resolution'] = (self.window.width, self.window.height)
             self.shader_program['u_real_range'] = (self.real_min, self.real_max)
             self.shader_program['u_imag_range'] = (self.imag_min, self.imag_max)

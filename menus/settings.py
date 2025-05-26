@@ -119,20 +119,21 @@ class Settings(arcade.gui.UIView):
                     else:
                         label_text = f"FPS Limit: {self.settings_dict.get(setting_dict['config_key'], setting_dict['default'])}"
                 else:
-                    label_text = f"{setting}: {int(self.settings_dict.get(setting_dict['config_key'], setting_dict['default']))}"
+                    label_text = f"{setting}: {self.settings_dict.get(setting_dict['config_key'], setting_dict['default'])}"
 
                 label.text = label_text
 
                 self.slider_labels[setting] = label
 
-                slider = arcade.gui.UISlider(width=400, height=50, value=self.settings_dict.get(setting_dict["config_key"], setting_dict["default"]), min_value=setting_dict['min'], max_value=setting_dict['max'], style=slider_style)
-                slider.on_change = lambda _, setting=setting, slider=slider: self.update(setting, slider.value, "slider")
+                slider = arcade.gui.UISlider(width=400, height=50, value=self.settings_dict.get(setting_dict["config_key"], setting_dict["default"]), min_value=setting_dict['min'], max_value=setting_dict['max'], step=setting_dict.get("step", 1), style=slider_style)
+                slider._render_steps = lambda surface: None
+                slider.on_change = lambda event, setting=setting, slider=slider: self.update(setting, slider.value, "slider")
 
                 self.sliders[setting] = slider
                 self.value_layout.add(slider)
 
         self.apply_button = arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Apply', style=button_style, width=200, height=100)
-        self.apply_button.on_click = lambda e: self.apply_settings()
+        self.apply_button.on_click = lambda event: self.apply_settings()
         self.anchor.add(self.apply_button, anchor_x="right", anchor_y="bottom", align_x=-10, align_y=10)
 
     def apply_settings(self):
@@ -221,18 +222,16 @@ class Settings(arcade.gui.UIView):
                 self.set_normal_style(self.on_radiobuttons[setting])
 
         elif setting_type == "slider":
-            new_value = int(button_state)
-
-            self.modified_settings[config_key] = new_value
-            self.sliders[setting].value = new_value
+            self.modified_settings[config_key] = button_state
+            self.sliders[setting].value = button_state
 
             if setting == "FPS Limit":
-                if new_value == 0:
+                if button_state == 0:
                     label_text = "FPS Limit: Disabled"
                 else:
-                    label_text = f"FPS Limit: {str(new_value).rjust(8)}"
+                    label_text = f"FPS Limit: {str(button_state).rjust(8)}"
             else:
-                label_text = f"{setting}: {str(new_value).rjust(8)}"
+                label_text = f"{setting}: {str(button_state).rjust(8)}"
 
             self.slider_labels[setting].text = label_text
 

@@ -40,8 +40,6 @@ void main() {
 
     if (iters != u_maxIter) {
         float t = float(iters) / float(u_maxIter);
-        float pow_amount = 0.7;
-        t = pow(t, pow_amount);
 
         value.r = 9.0 * (1.0 - t) * t * t * t;
         value.g = 15.0 * (1.0 - t) * (1.0 - t) * t * t;
@@ -102,7 +100,8 @@ layout(location = 0, rgba32f) uniform image2D img_output;
 void main() {
     ivec2 texel_coord = ivec2(gl_GlobalInvocationID.xy);
 
-    int R = {escape_radius};
+    float R = {escape_radius};
+    int n = {julia_n};
     {vec2type} c = {vec2type}{julia_c};
 
     {vec2type} z = map_pixel({floattype}(texel_coord.x), {floattype}(texel_coord.y), u_resolution, u_real_range, u_imag_range);
@@ -110,9 +109,9 @@ void main() {
     int iters = 0;
 
     while ((z.x * z.x + z.y * z.y) < pow(R, 2) && iters < u_maxIter) {
-        {floattype} xtemp = z.x * z.x - z.y * z.y;
-        z.y = 2 * z.x * z.y  + c.y;
-        z.x = xtemp + c.x;
+        {floattype} xtmp = pow((z.x * z.x + z.y * z.y), (n / 2)) * cos(n * atan(z.y, z.x)) + c.x;
+        z.y = pow((z.x * z.x + z.y * z.y), (n / 2)) * sin(n * atan(z.y, z.x)) + c.y;
+        z.x = xtmp;
 
         iters = iters + 1;
     }
@@ -121,8 +120,6 @@ void main() {
 
     if (iters != u_maxIter) {
         float t = float(iters) / float(u_maxIter);
-        float pow_amount = 0.7;
-        t = pow(t, pow_amount);
 
         value.r = 9.0 * (1.0 - t) * t * t * t;
         value.g = 15.0 * (1.0 - t) * (1.0 - t) * t * t;
@@ -152,7 +149,7 @@ def create_sierpinsky_carpet_shader(width, height, precision="single"):
 
     return shader_program, sierpinsky_carpet_image
 
-def create_julia_shader(width, height, precision="single", escape_radius=2, julia_type="Classic swirling"):
+def create_julia_shader(width, height, precision="single", escape_radius=2, julia_type="Classic swirling", julia_n=2):
     shader_source = julia_compute_source
 
     if precision == "single":
@@ -166,6 +163,7 @@ def create_julia_shader(width, height, precision="single", escape_radius=2, juli
     shader_source = shader_source.replace("{julia_c}", str(julia_c))
 
     shader_source = shader_source.replace("{escape_radius}", str(escape_radius))
+    shader_source = shader_source.replace("{julia_n}", str(julia_n))
 
     shader_program = pyglet.graphics.shader.ComputeShaderProgram(shader_source)
 

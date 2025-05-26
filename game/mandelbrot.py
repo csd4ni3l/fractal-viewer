@@ -64,7 +64,7 @@ class MandelbrotViewer(arcade.gui.UIView):
 
     def create_image(self):
         with self.shader_program:
-            self.shader_program['u_maxIter'] = self.max_iter
+            self.shader_program['u_maxIter'] = int(self.max_iter)
             self.shader_program['u_resolution'] = (self.window.width, self.window.height)
             self.shader_program['u_real_range'] = (self.real_min, self.real_max)
             self.shader_program['u_imag_range'] = (self.imag_min, self.imag_max)
