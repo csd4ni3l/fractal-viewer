@@ -80,8 +80,7 @@ void main() {
 }
 
 """
-
-julia_compute_source = """#version 430 core
+julia_template = """#version 430 core
 
 uniform int u_maxIter;
 uniform vec2 u_resolution;
@@ -108,13 +107,7 @@ void main() {
 
     int iters = 0;
 
-    while ((z.x * z.x + z.y * z.y) < pow(R, 2) && iters < u_maxIter) {
-        {floattype} xtmp = pow((z.x * z.x + z.y * z.y), (n / 2)) * cos(n * atan(z.y, z.x)) + c.x;
-        z.y = pow((z.x * z.x + z.y * z.y), (n / 2)) * sin(n * atan(z.y, z.x)) + c.y;
-        z.x = xtmp;
-
-        iters = iters + 1;
-    }
+    {julia_calc}
 
     vec4 value = vec4(0.0, 0.0, 0.0, 1.0);
 
@@ -128,6 +121,25 @@ void main() {
 
     imageStore(img_output, texel_coord, value);
 }
+"""
+
+normal_julia_calc = """while (z.x * z.x + z.y * z.y < R*R && iters < u_maxIter)
+    {
+        {floattype} xtemp = z.x * z.x - z.y * z.y;
+        z.y = 2 * z.x * z.y + c.y;
+        z.x = xtemp + c.x;
+
+        iters = iters + 1;
+    }
+"""
+
+multi_julia_calc = """while ((z.x * z.x + z.y * z.y) < R*R && iters < u_maxIter) {
+        {floattype} xtmp = pow((z.x * z.x + z.y * z.y), (n / 2)) * cos(n * atan(z.y, z.x)) + c.x;
+        z.y = pow((z.x * z.x + z.y * z.y), (n / 2)) * sin(n * atan(z.y, z.x)) + c.y;
+        z.x = xtmp;
+
+        iters = iters + 1;
+    }
 """
 
 def create_sierpinsky_carpet_shader(width, height, precision="single"):
@@ -150,20 +162,26 @@ def create_sierpinsky_carpet_shader(width, height, precision="single"):
     return shader_program, sierpinsky_carpet_image
 
 def create_julia_shader(width, height, precision="single", escape_radius=2, julia_type="Classic swirling", julia_n=2):
-    shader_source = julia_compute_source
+    shader_source = julia_template
 
-    if precision == "single":
-        shader_source = shader_source.replace("{vec2type}", "vec2").replace("{floattype}", "float")
-    elif precision == "double":
-        shader_source = shader_source.replace("{vec2type}", "dvec2").replace("{floattype}", "double")
+    if julia_n == 2:
+        shader_source = shader_source.replace("{julia_calc}", normal_julia_calc)
+
+        if precision == "single":
+            shader_source = shader_source.replace("{vec2type}", "vec2").replace("{floattype}", "float")
+        elif precision == "double":
+            shader_source = shader_source.replace("{vec2type}", "dvec2").replace("{floattype}", "double")
+
     else:
-        raise TypeError("Invalid Precision")
+        shader_source = shader_source.replace("{julia_calc}", multi_julia_calc)
+        shader_source = shader_source.replace("{vec2type}", "vec2").replace("{floattype}", "float") # pow and atan only support floats
+
+    shader_source = shader_source.replace("{julia_n}", str(julia_n))
 
     julia_c = c_for_julia_type[julia_type]
     shader_source = shader_source.replace("{julia_c}", str(julia_c))
 
     shader_source = shader_source.replace("{escape_radius}", str(escape_radius))
-    shader_source = shader_source.replace("{julia_n}", str(julia_n))
 
     shader_program = pyglet.graphics.shader.ComputeShaderProgram(shader_source)
 
