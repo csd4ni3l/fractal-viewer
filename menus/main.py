@@ -1,5 +1,4 @@
 import arcade, arcade.gui, asyncio, pypresence, time, copy, json
-from game.play import FractalChooser
 from utils.preload import button_texture, button_hovered_texture
 from utils.constants import big_button_style, discord_presence_id
 from utils.utils import FakePyPresence
@@ -60,7 +59,7 @@ class Main(arcade.gui.UIView):
         self.settings_button.on_click = lambda event: self.settings()
 
     def play(self):
-        from game.play import FractalChooser
+        from menus.fractal_chooser import FractalChooser
         self.window.show_view(FractalChooser(self.pypresence_client))
 
     def settings(self):

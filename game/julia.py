@@ -2,7 +2,7 @@ import arcade, arcade.gui, pyglet, json
 
 from PIL import Image
 
-from game.shader import create_julia_shader
+from game.shader import create_iter_calc_shader
 from utils.constants import menu_background_color, button_style
 from utils.preload import button_texture, button_hovered_texture
 
@@ -37,7 +37,7 @@ class JuliaViewer(arcade.gui.UIView):
     def on_show_view(self):
         super().on_show_view()
 
-        self.shader_program, self.julia_image = create_julia_shader(self.window.width, self.window.height, self.settings_dict.get("julia_precision", "Single").lower(), self.settings_dict.get("julia_escape_radius", 2), self.settings_dict.get("julia_type", "Classic swirling"), int(self.settings_dict.get("julia_n", 2)))
+        self.shader_program, self.julia_image = create_iter_calc_shader("julia", self.window.width, self.window.height, self.settings_dict.get("julia_precision", "Single").lower(), int(self.settings_dict.get("julia_n", 2)), self.settings_dict.get("julia_escape_radius", 2), self.settings_dict.get("julia_type", "Classic swirling"))
 
         self.julia_sprite = pyglet.sprite.Sprite(img=self.julia_image)
 

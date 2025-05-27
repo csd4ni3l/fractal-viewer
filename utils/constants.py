@@ -12,6 +12,16 @@ mandelbrot_initial_real_max = 1.0
 mandelbrot_initial_imag_min = -1.0
 mandelbrot_initial_imag_max = 1.0
 
+burning_ship_initial_real_min = -2.0
+burning_ship_initial_real_max = 1.5
+burning_ship_initial_imag_min = -2.0
+burning_ship_initial_imag_max = 1.0
+
+newton_fractal_initial_real_min = -2.0
+newton_fractal_initial_real_max = 2.0
+newton_fractal_initial_imag_min = -2.0
+newton_fractal_initial_imag_max = 2.0
+
 c_for_julia_type = {
     "Classic swirling": (-0.7, 0.27015),
     "Douady rabbit": (-0.123, 0.745),
@@ -35,8 +45,16 @@ slider_style = {'normal': slider_default_style, 'hover': slider_hover_style, 'pr
 settings = {
     "Mandelbrot": {
         "Float Precision": {"type": "option", "options": ["Single", "Double"], "config_key": "mandelbrot_precision", "default": "Single"},
+        "N": {"type": "slider", "min": 1, "max": 10, "config_key": "mandelbrot_n", "default": 2, "step": 1},
+        "Escape Radius": {"type": "slider", "min": 1, "max": 10, "config_key": "mandelbrot_escape_radius", "default": 2, "step": 0.1},
         "Zoom Increase Per Click": {"type": "slider", "min": 2, "max": 100, "config_key": "mandelbrot_zoom_increase", "default": 2},
         "Max Iterations": {"type": "slider", "min": 100, "max": 10000, "config_key": "mandelbrot_max_iter", "default": 200, "step": 100}
+    },
+    "Burning Ship": {
+        "Float Precision": {"type": "option", "options": ["Single", "Double"], "config_key": "burning_ship_precision", "default": "Single"},
+        "Escape Radius": {"type": "slider", "min": 1, "max": 10, "config_key": "burning_ship_escape_radius", "default": 2, "step": 0.1},
+        "Zoom Increase Per Click": {"type": "slider", "min": 2, "max": 100, "config_key": "burning_ship_zoom_increase", "default": 2},
+        "Max Iterations": {"type": "slider", "min": 100, "max": 10000, "config_key": "burning_ship_max_iter", "default": 200, "step": 100}
     },
     "Sierpinsky Carpet": {
         "Float Precision": {"type": "option", "options": ["Single", "Double"], "config_key": "sierpinsky_precision", "default": "Single"},
@@ -49,7 +67,11 @@ settings = {
         "N": {"type": "slider", "min": 1, "max": 10, "config_key": "julia_n", "default": 2, "step": 1},
         "Escape Radius": {"type": "slider", "min": 1, "max": 10, "config_key": "julia_escape_radius", "default": 2, "step": 0.1},
         "Zoom Increase Per Click": {"type": "slider", "min": 2, "max": 100, "config_key": "julia_zoom_increase", "default": 2},
-        "Max Iterations": {"type": "slider", "min": 100, "max": 10000, "config_key": "julia_max_iter", "default": 200, "step": 100}
+        "Max Iterations": {"type": "slider", "min": 100, "max": 4000, "config_key": "julia_max_iter", "default": 200, "step": 100}
+    },
+    "Newton Fractal": {
+        "Zoom Increase Per Click": {"type": "slider", "min": 2, "max": 100, "config_key": "newton_fractal_zoom_increase", "default": 2},
+        "Max Iterations": {"type": "slider", "min": 100, "max": 10000, "config_key": "newton_fractal_max_iter", "default": 200, "step": 100}
     },
     "Graphics": {
         "Window Mode": {"type": "option", "options": ["Windowed", "Fullscreen", "Borderless"], "config_key": "window_mode", "default": "Windowed"},

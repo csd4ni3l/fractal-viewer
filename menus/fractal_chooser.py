@@ -32,6 +32,12 @@ class FractalChooser(arcade.gui.UIView):
         self.julia_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Julia', style=button_style, width=200, height=200), row=0, column=2)
         self.julia_button.on_click = lambda event: self.julia()
 
+        self.burning_ship_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Burning Ship', style=button_style, width=200, height=200), row=1, column=0)
+        self.burning_ship_button.on_click = lambda event: self.burning_ship()
+
+        self.newton_fractal_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Newton Fractal', style=button_style, width=200, height=200), row=1, column=1)
+        self.newton_fractal_button.on_click = lambda event: self.newton_fractal()
+
     def main_exit(self):
         from menus.main import Main
         self.window.show_view(Main(self.pypresence_client))
@@ -47,3 +53,11 @@ class FractalChooser(arcade.gui.UIView):
     def julia(self):
         from game.julia import JuliaViewer
         self.window.show_view(JuliaViewer(self.pypresence_client))
+
+    def burning_ship(self):
+        from game.burning_ship import BurningShipViewer
+        self.window.show_view(BurningShipViewer(self.pypresence_client))
+
+    def newton_fractal(self):
+        from game.newton_fractal import NewtonFractalViewer
+        self.window.show_view(NewtonFractalViewer(self.pypresence_client))
