@@ -1,9 +1,7 @@
 import arcade, arcade.gui, pyglet, json
 
-from PIL import Image
-
 from game.shader import create_sierpinsky_carpet_shader
-from utils.constants import menu_background_color, button_style
+from utils.constants import button_style
 from utils.preload import button_texture, button_hovered_texture
 
 class SierpinskyCarpetViewer(arcade.gui.UIView):

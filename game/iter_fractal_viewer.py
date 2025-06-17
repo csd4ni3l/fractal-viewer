@@ -1,37 +1,42 @@
 import arcade, arcade.gui, pyglet, json
 
-from PIL import Image
-
 from game.shader import create_iter_calc_shader
-from utils.constants import menu_background_color, button_style, burning_ship_initial_real_min, burning_ship_initial_real_max, burning_ship_initial_imag_min, burning_ship_initial_imag_max
+from utils.constants import button_style, initial_real_imag
 from utils.preload import button_texture, button_hovered_texture
 
-class BurningShipViewer(arcade.gui.UIView):
-    def __init__(self, pypresence_client):
+class IterFractalViewer(arcade.gui.UIView):
+    def __init__(self, pypresence_client, fractal_name: str):
         super().__init__()
 
         self.pypresence_client = pypresence_client
-        self.real_min = burning_ship_initial_real_min
-        self.real_max = burning_ship_initial_real_max
-        self.imag_min = burning_ship_initial_imag_min
-        self.imag_max = burning_ship_initial_imag_max
+        self.fractal_name = fractal_name
 
         with open("settings.json", "r") as file:
             self.settings_dict = json.load(file)
 
-        self.max_iter = self.settings_dict.get("burning_ship_max_iter", 200)
+        self.escape_radius = int(self.settings_dict.get(f"{self.fractal_name}_escape_radius", 2))
+        self.real_min, self.real_max, self.imag_min, self.imag_max = initial_real_imag[fractal_name] if fractal_name != "julia" else (-self.escape_radius, self.escape_radius, -self.escape_radius, self.escape_radius)
+        self.max_iter = self.settings_dict.get(f"{self.fractal_name}_max_iter", 200)
         self.zoom = 1.0
 
     def on_show_view(self):
         super().on_show_view()
 
-        self.shader_program, self.burning_ship_image = create_iter_calc_shader("burning_ship", self.window.width, self.window.height, self.settings_dict.get("burning_ship_precision", "Single").lower(), 2, int(self.settings_dict.get("burning_ship_escape_radius", 2)))
+        self.shader_program, self.fractal_image = create_iter_calc_shader(
+            self.fractal_name, 
+            self.window.width,
+            self.window.height,
+            self.settings_dict.get(f"{self.fractal_name}_precision", "Single").lower(),
+            int(self.settings_dict.get(f"{self.fractal_name}_n", 2)), # This will work for non-exponentiable fractals as well because they dont have an _n property
+            int(self.settings_dict.get(f"{self.fractal_name}_escape_radius", 2)),
+            self.settings_dict.get("julia_type", "Classic swirling")
+        )
 
-        self.burning_ship_sprite = pyglet.sprite.Sprite(img=self.burning_ship_image)
+        self.fractal_sprite = pyglet.sprite.Sprite(img=self.fractal_image)
 
         self.create_image()
 
-        self.pypresence_client.update(state='Viewing Burning Ship', details=f'Zoom: {self.zoom}\nMax Iterations: {self.max_iter}', start=self.pypresence_client.start_time)
+        self.pypresence_client.update(state=f'Viewing {self.fractal_name.replace("_", " ").capitalize()}', details=f'Zoom: {self.zoom}\nMax Iterations: {self.max_iter}', start=self.pypresence_client.start_time)
 
         self.setup_ui()
 
@@ -68,15 +73,15 @@ class BurningShipViewer(arcade.gui.UIView):
             self.shader_program['u_resolution'] = (self.window.width, self.window.height)
             self.shader_program['u_real_range'] = (self.real_min, self.real_max)
             self.shader_program['u_imag_range'] = (self.imag_min, self.imag_max)
-            self.shader_program.dispatch(self.burning_ship_image.width, self.burning_ship_image.height, 1, barrier=pyglet.gl.GL_ALL_BARRIER_BITS)
+            self.shader_program.dispatch(self.fractal_image.width, self.fractal_image.height, 1, barrier=pyglet.gl.GL_ALL_BARRIER_BITS)
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> bool | None:
         super().on_mouse_press(x, y, button, modifiers)
 
         if button == arcade.MOUSE_BUTTON_LEFT:
-            zoom = self.settings_dict.get("burning_ship_zoom_increase", 2)
+            zoom = self.settings_dict.get(f"{self.fractal_name}_zoom_increase", 2)
         elif button == arcade.MOUSE_BUTTON_RIGHT:
-            zoom = 1 / self.settings_dict.get("burning_ship_zoom_increase", 2)
+            zoom = 1 / self.settings_dict.get(f"{self.fractal_name}_zoom_increase", 2)
         else:
             return
 
@@ -87,9 +92,9 @@ class BurningShipViewer(arcade.gui.UIView):
         self.zoom_at(self.window.mouse.data["x"], self.window.mouse.data["y"], zoom)
         self.create_image()
 
-        self.pypresence_client.update(state='Viewing Burning Ship', details=f'Zoom: {self.zoom}\nMax Iterations: {self.max_iter}', start=self.pypresence_client.start_time)
+        self.pypresence_client.update(state=f'Viewing {self.fractal_name.replace("_", " ").capitalize()}', details=f'Zoom: {self.zoom}\nMax Iterations: {self.max_iter}', start=self.pypresence_client.start_time)
 
     def on_draw(self):
         self.window.clear()
-        self.burning_ship_sprite.draw()
+        self.fractal_sprite.draw()
         self.ui.draw()

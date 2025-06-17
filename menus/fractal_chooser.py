@@ -1,6 +1,6 @@
 import arcade, arcade.gui
 
-from utils.constants import button_style
+from utils.constants import button_style, iter_fractals
 from utils.preload import button_texture, button_hovered_texture
 
 class FractalChooser(arcade.gui.UIView):
@@ -8,6 +8,7 @@ class FractalChooser(arcade.gui.UIView):
         super().__init__()
 
         self.pypresence_client = pypresence_client
+        self.iter_fractal_buttons = []
 
     def on_show_view(self):
         super().on_show_view()
@@ -23,41 +24,26 @@ class FractalChooser(arcade.gui.UIView):
         self.back_button.on_click = lambda event: self.main_exit()
         self.anchor.add(self.back_button, anchor_x="left", anchor_y="top", align_x=5, align_y=-5)
 
-        self.mandelbrot_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Mandelbrot', style=button_style, width=200, height=200), row=0, column=0)
-        self.mandelbrot_button.on_click = lambda event: self.mandelbrot()
+        for n, fractal_name in enumerate(iter_fractals):
+            row = n // 3
+            col = n % 3
 
-        self.sierpinsky_carpet_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Sierpinsky Carpet', style=button_style, width=200, height=200), row=0, column=1)
+            self.iter_fractal_buttons.append(self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text=fractal_name.replace("_", " ").capitalize(), style=button_style, width=200, height=200), row=row, column=col))
+            self.mandelbrot_button.on_click = lambda event, fractal_name=fractal_name: self.iter_fractal(fractal_name)
+
+        row = n // 3
+        col = n % 3
+        self.sierpinsky_carpet_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Sierpinsky Carpet', style=button_style, width=200, height=200), row=0, column=n + 1)
         self.sierpinsky_carpet_button.on_click = lambda event: self.sierpinsky_carpet()
-
-        self.julia_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Julia', style=button_style, width=200, height=200), row=0, column=2)
-        self.julia_button.on_click = lambda event: self.julia()
-
-        self.burning_ship_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Burning Ship', style=button_style, width=200, height=200), row=1, column=0)
-        self.burning_ship_button.on_click = lambda event: self.burning_ship()
-
-        self.newton_fractal_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Newton Fractal', style=button_style, width=200, height=200), row=1, column=1)
-        self.newton_fractal_button.on_click = lambda event: self.newton_fractal()
 
     def main_exit(self):
         from menus.main import Main
         self.window.show_view(Main(self.pypresence_client))
 
-    def mandelbrot(self):
-        from game.mandelbrot import MandelbrotViewer
-        self.window.show_view(MandelbrotViewer(self.pypresence_client))
+    def iter_fractal(self, fractal_name):
+        from game.iter_fractal_viewer import IterFractalViewer
+        self.window.show_view(IterFractalViewer(self.pypresence_client, fractal_name))
 
     def sierpinsky_carpet(self):
         from game.sierpinsky_carpet import SierpinskyCarpetViewer
         self.window.show_view(SierpinskyCarpetViewer(self.pypresence_client))
-
-    def julia(self):
-        from game.julia import JuliaViewer
-        self.window.show_view(JuliaViewer(self.pypresence_client))
-
-    def burning_ship(self):
-        from game.burning_ship import BurningShipViewer
-        self.window.show_view(BurningShipViewer(self.pypresence_client))
-
-    def newton_fractal(self):
-        from game.newton_fractal import NewtonFractalViewer
-        self.window.show_view(NewtonFractalViewer(self.pypresence_client))

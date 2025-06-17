@@ -7,20 +7,11 @@ menu_background_color = (30, 30, 47)
 log_dir = 'logs'
 discord_presence_id = 1365949409254441000
 
-mandelbrot_initial_real_min = -2.0
-mandelbrot_initial_real_max = 1.0
-mandelbrot_initial_imag_min = -1.0
-mandelbrot_initial_imag_max = 1.0
-
-burning_ship_initial_real_min = -2.0
-burning_ship_initial_real_max = 1.5
-burning_ship_initial_imag_min = -2.0
-burning_ship_initial_imag_max = 1.0
-
-newton_fractal_initial_real_min = -2.0
-newton_fractal_initial_real_max = 2.0
-newton_fractal_initial_imag_min = -2.0
-newton_fractal_initial_imag_max = 2.0
+initial_real_imag = {
+    "mandelbrot": (-2.0, 1.0, -1.0, 1.0),
+    "burning_ship": (-2.0, 1.5, -2.0, 1.0),
+    "newton_fractal": (-2.0, 2.0, -2.0, 2.0)
+}
 
 c_for_julia_type = {
     "Classic swirling": (-0.7, 0.27015),
@@ -28,6 +19,8 @@ c_for_julia_type = {
     "Nebula-style": (0.285, 0),
     "Snowflake": (-0.8, 0.156)
 }
+
+iter_fractals = ["mandelbrot", "julia", "burning_ship", "newton_fractal"]
 
 button_style = {'normal': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK), 'hover': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK),
                 'press': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK), 'disabled': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK)}
