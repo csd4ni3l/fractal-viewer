@@ -166,6 +166,46 @@ multibrot_calc = """int calculate_iters(vec2 c) {{
 }}
 """
 
+mandelbar_calc = """int calculate_iters({vec2type} c) {{
+    int iters = 0;
+    {vec2type} z = {vec2type}(0.0, 0.0);
+    float R = {escape_radius};
+
+    while (dot(z, z) < R * R && iters < u_maxIter) {{
+        z = {vec2type}(
+            z.x * z.x - z.y * z.y + c.x,
+            -2.0 * z.x * z.y + c.y
+        );
+
+        iters++;
+    }}
+
+    return iters;
+}}
+"""
+
+multi_mandelbar_calc = """int calculate_iters(vec2 c) {{
+    int iters = 0;
+    vec2 z = vec2(0.0);
+    float n = {multi_n};
+    float R = {escape_radius};
+
+    while (dot(z, z) < R * R && iters < u_maxIter) {{
+        float r = length(z);
+        float theta = atan(-z.y, z.x);
+
+        float r_n = pow(r, n);
+        float theta_n = n * theta;
+
+        z = r_n * vec2(cos(theta_n), sin(theta_n)) + c;
+
+        iters++;
+    }}
+
+    return iters;
+}}
+"""
+
 burning_ship_calc = """int calculate_iters({vec2type} c) {{
     int iters = 0;
     {vec2type} z = {vec2type}(0.0, 0.0);
@@ -182,6 +222,54 @@ burning_ship_calc = """int calculate_iters({vec2type} c) {{
     return iters;
 }}
 """
+
+phoenix_fractal_calc = """int calculate_iters({vec2type} c) {{
+    int iters = 0;
+    {vec2type} z = {vec2type}(0.0, 0.0);
+    {vec2type} z_prev = {vec2type}(0.0, 0.0);
+    {floattype} p = 0.56667;
+    {floattype} R = {escape_radius};
+
+    while (dot(z, z) < R * R && iters < u_maxIter) {{
+        {vec2type} z_new = {vec2type}(
+            z.x * z.x - z.y * z.y + c.x - p * z_prev.x,
+            2.0 * z.x * z.y + c.y - p * z_prev.y
+        );
+
+        z_prev = z;
+        z = z_new;
+        iters++;
+    }}
+
+    return iters;
+}}
+"""
+
+lambda_fractal_calc = """int calculate_iters({vec2type} c) {{
+    int iters = 0;
+    {vec2type} z = {vec2type}(0.5, 0.0); // Try nonzero start
+    float R = {escape_radius};           // Try R = 2.0 if needed
+
+    while (dot(z, z) < R * R && iters < u_maxIter) {{
+        {vec2type} one_minus_z = {vec2type}(1.0, 1.0) - z;
+
+        {vec2type} temp = {vec2type}(
+            z.x * one_minus_z.x - z.y * one_minus_z.y,
+            z.x * one_minus_z.y + z.y * one_minus_z.x
+        );
+
+        z = {vec2type}(
+            c.x * temp.x - c.y * temp.y,
+            c.x * temp.y + c.y * temp.x
+        );
+
+        iters++;
+    }}
+
+    return iters;
+}}
+"""
+
 
 newton_fractal_calc = """vec2 cmul(vec2 a, vec2 b) {{
     return vec2(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
@@ -268,6 +356,18 @@ def create_iter_calc_shader(fractal_type, width, height, precision="single", mul
             replacements["iter_calc_func"] = mandelbrot_calc.format_map(replacements)
         else:
             replacements["iter_calc_func"] = multibrot_calc.format_map(replacements)
+
+    elif fractal_type == "mandelbar":
+        if int(multi_n) == 2:
+            replacements["iter_calc_func"] = mandelbar_calc.format_map(replacements)
+        else:
+            replacements["iter_calc_func"] = multi_mandelbar_calc.format_map(replacements)
+
+    elif fractal_type == "phoenix_fractal":
+        replacements["iter_calc_func"] = phoenix_fractal_calc.format_map(replacements)
+
+    elif fractal_type == "lambda_fractal":
+        replacements["iter_calc_func"] = lambda_fractal_calc.format_map(replacements)
 
     elif fractal_type == "julia":
         if int(multi_n) == 2:

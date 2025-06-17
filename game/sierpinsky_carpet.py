@@ -38,8 +38,8 @@ class SierpinskyCarpetViewer(arcade.gui.UIView):
         self.anchor = self.add_widget(arcade.gui.UIAnchorLayout(size_hint=(1, 1)))
 
         self.info_box = self.anchor.add(arcade.gui.UIBoxLayout(space_between=10, vertical=False), anchor_x="center", anchor_y="top")
-        self.zoom_label = self.info_box.add(arcade.gui.UILabel(text=f"Zoom: {self.zoom}", font_name="Protest Strike", font_size=16))
-        self.depth_label = self.info_box.add(arcade.gui.UILabel(text=f"Depth: {self.depth}", font_name="Protest Strike", font_size=16))
+        self.zoom_label = self.info_box.add(arcade.gui.UILabel(text=f"Zoom: {self.zoom}", font_name="Roboto", font_size=16))
+        self.depth_label = self.info_box.add(arcade.gui.UILabel(text=f"Depth: {self.depth}", font_name="Roboto", font_size=16))
 
         self.back_button = arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='<--', style=button_style, width=100, height=50)
         self.back_button.on_click = lambda event: self.main_exit()

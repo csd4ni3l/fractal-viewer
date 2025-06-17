@@ -50,7 +50,7 @@ class Main(arcade.gui.UIView):
     def on_show_view(self):
         super().on_show_view()
 
-        self.title_label = self.box.add(arcade.gui.UILabel(text="Fractal Viewer", font_name="Protest Strike", font_size=48))
+        self.title_label = self.box.add(arcade.gui.UILabel(text="Fractal Viewer", font_name="Roboto", font_size=48))
 
         self.play_button = self.box.add(arcade.gui.UITextureButton(text="Play", texture=button_texture, texture_hovered=button_hovered_texture, width=self.window.width / 2, height=150, style=big_button_style))
         self.play_button.on_click = lambda event: self.play()

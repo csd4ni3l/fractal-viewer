@@ -9,6 +9,9 @@ discord_presence_id = 1365949409254441000
 
 initial_real_imag = {
     "mandelbrot": (-2.0, 1.0, -1.0, 1.0),
+    "mandelbar": (-2.0, 1.0, -1.0, 1.0),
+    "phoenix_fractal": (-2.0, 1.0, -1.0, 1.0),
+    "lambda_fractal": (-2.0, 1.0, -1.0, 1.0),
     "burning_ship": (-2.0, 1.5, -2.0, 1.0),
     "newton_fractal": (-2.0, 2.0, -2.0, 2.0)
 }
@@ -20,15 +23,15 @@ c_for_julia_type = {
     "Snowflake": (-0.8, 0.156)
 }
 
-iter_fractals = ["mandelbrot", "julia", "burning_ship", "newton_fractal"]
+iter_fractals = ["mandelbrot", "mandelbar", "phoenix_fractal", "lambda_fractal", "julia", "burning_ship", "newton_fractal"]
 
-button_style = {'normal': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK), 'hover': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK),
-                'press': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK), 'disabled': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK)}
-big_button_style = {'normal': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK, font_size=26), 'hover': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK, font_size=26),
-                'press': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK, font_size=26), 'disabled': UITextureButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK, font_size=26)}
+button_style = {'normal': UITextureButtonStyle(font_name="Roboto", font_color=arcade.color.BLACK), 'hover': UITextureButtonStyle(font_name="Roboto", font_color=arcade.color.BLACK),
+                'press': UITextureButtonStyle(font_name="Roboto", font_color=arcade.color.BLACK), 'disabled': UITextureButtonStyle(font_name="Roboto", font_color=arcade.color.BLACK)}
+big_button_style = {'normal': UITextureButtonStyle(font_name="Roboto", font_color=arcade.color.BLACK, font_size=26), 'hover': UITextureButtonStyle(font_name="Roboto", font_color=arcade.color.BLACK, font_size=26),
+                'press': UITextureButtonStyle(font_name="Roboto", font_color=arcade.color.BLACK, font_size=26), 'disabled': UITextureButtonStyle(font_name="Roboto", font_color=arcade.color.BLACK, font_size=26)}
 
-dropdown_style = {'normal': UIFlatButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK, bg=Color(128, 128, 128)), 'hover': UIFlatButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK, bg=Color(49, 154, 54)),
-                  'press': UIFlatButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK, bg=Color(128, 128, 128)), 'disabled': UIFlatButtonStyle(font_name="Protest Strike", font_color=arcade.color.BLACK, bg=Color(128, 128, 128))}
+dropdown_style = {'normal': UIFlatButtonStyle(font_name="Roboto", font_color=arcade.color.BLACK, bg=Color(128, 128, 128)), 'hover': UIFlatButtonStyle(font_name="Roboto", font_color=arcade.color.BLACK, bg=Color(49, 154, 54)),
+                  'press': UIFlatButtonStyle(font_name="Roboto", font_color=arcade.color.BLACK, bg=Color(128, 128, 128)), 'disabled': UIFlatButtonStyle(font_name="Roboto", font_color=arcade.color.BLACK, bg=Color(128, 128, 128))}
 
 slider_default_style = UISliderStyle(bg=Color(128, 128, 128), unfilled_track=Color(128, 128, 128), filled_track=Color(49, 154, 54))
 slider_hover_style = UISliderStyle(bg=Color(49, 154, 54), unfilled_track=Color(128, 128, 128), filled_track=Color(49, 154, 54))
@@ -42,6 +45,25 @@ settings = {
         "Escape Radius": {"type": "slider", "min": 1, "max": 10, "config_key": "mandelbrot_escape_radius", "default": 2, "step": 0.1},
         "Zoom Increase Per Click": {"type": "slider", "min": 2, "max": 100, "config_key": "mandelbrot_zoom_increase", "default": 2},
         "Max Iterations": {"type": "slider", "min": 100, "max": 10000, "config_key": "mandelbrot_max_iter", "default": 200, "step": 100}
+    },
+    "Mandelbar": {
+        "Float Precision": {"type": "option", "options": ["Single", "Double"], "config_key": "mandelbar_precision", "default": "Single"},
+        "N": {"type": "slider", "min": 1, "max": 10, "config_key": "mandelbar_n", "default": 2, "step": 1},
+        "Escape Radius": {"type": "slider", "min": 1, "max": 10, "config_key": "mandelbar_escape_radius", "default": 2, "step": 0.1},
+        "Zoom Increase Per Click": {"type": "slider", "min": 2, "max": 100, "config_key": "mandelbar_zoom_increase", "default": 2},
+        "Max Iterations": {"type": "slider", "min": 100, "max": 10000, "config_key": "mandelbar_max_iter", "default": 200, "step": 100}
+    },
+    "Phoenix Fractal": {
+        "Float Precision": {"type": "option", "options": ["Single", "Double"], "config_key": "phoenix_fractal_precision", "default": "Single"},
+        "Escape Radius": {"type": "slider", "min": 1, "max": 10, "config_key": "phoenix_fractal_escape_radius", "default": 2, "step": 0.1},
+        "Zoom Increase Per Click": {"type": "slider", "min": 2, "max": 100, "config_key": "phoenix_fractal_zoom_increase", "default": 2},
+        "Max Iterations": {"type": "slider", "min": 100, "max": 10000, "config_key": "phoenix_fractal_max_iter", "default": 200, "step": 100}
+    },
+    "Lambda Fractal": {
+        "Float Precision": {"type": "option", "options": ["Single", "Double"], "config_key": "phoenix_fractal_precision", "default": "Single"},
+        "Escape Radius": {"type": "slider", "min": 1, "max": 10, "config_key": "phoenix_fractal_escape_radius", "default": 2, "step": 0.1},
+        "Zoom Increase Per Click": {"type": "slider", "min": 2, "max": 100, "config_key": "phoenix_fractal_zoom_increase", "default": 2},
+        "Max Iterations": {"type": "slider", "min": 100, "max": 10000, "config_key": "phoenix_fractal_max_iter", "default": 200, "step": 100}
     },
     "Burning Ship": {
         "Float Precision": {"type": "option", "options": ["Single", "Double"], "config_key": "burning_ship_precision", "default": "Single"},

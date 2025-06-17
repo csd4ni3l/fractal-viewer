@@ -15,10 +15,10 @@ class FractalChooser(arcade.gui.UIView):
 
         self.anchor = self.add_widget(arcade.gui.UIAnchorLayout(size_hint=(1, 1)))
 
-        self.grid = self.add_widget(arcade.gui.UIGridLayout(row_count=3, column_count=3, horizontal_spacing=10, vertical_spacing=10))
+        self.grid = self.add_widget(arcade.gui.UIGridLayout(row_count=4, column_count=3, horizontal_spacing=10, vertical_spacing=10))
         self.anchor.add(self.grid, anchor_x="center", anchor_y="center")
 
-        self.title_label = self.anchor.add(arcade.gui.UILabel(text="Choose a fractal to view.", font_name="Protest Strike", font_size=32), anchor_x="center", anchor_y="top", align_y=-50)
+        self.title_label = self.anchor.add(arcade.gui.UILabel(text="Choose a fractal to view.", font_name="Roboto", font_size=32), anchor_x="center", anchor_y="top", align_y=-50)
 
         self.back_button = arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='<--', style=button_style, width=100, height=50)
         self.back_button.on_click = lambda event: self.main_exit()
@@ -27,13 +27,13 @@ class FractalChooser(arcade.gui.UIView):
         for n, fractal_name in enumerate(iter_fractals):
             row = n // 3
             col = n % 3
-
             self.iter_fractal_buttons.append(self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text=fractal_name.replace("_", " ").capitalize(), style=button_style, width=200, height=200), row=row, column=col))
-            self.mandelbrot_button.on_click = lambda event, fractal_name=fractal_name: self.iter_fractal(fractal_name)
+            self.iter_fractal_buttons[-1].on_click = lambda event, fractal_name=fractal_name: self.iter_fractal(fractal_name)
 
-        row = n // 3
-        col = n % 3
-        self.sierpinsky_carpet_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Sierpinsky Carpet', style=button_style, width=200, height=200), row=0, column=n + 1)
+        row = (n + 1) // 3
+        col = (n + 1) % 3
+
+        self.sierpinsky_carpet_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Sierpinsky Carpet', style=button_style, width=200, height=200), row=row, column=col)
         self.sierpinsky_carpet_button.on_click = lambda event: self.sierpinsky_carpet()
 
     def main_exit(self):

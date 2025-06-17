@@ -58,7 +58,7 @@ class Settings(arcade.gui.UIView):
 
     def display_categories(self):
         for category in settings:
-            category_button = arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text=category, style=button_style, width=self.window.width / 10, height=50)
+            category_button = arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text=category, style=button_style, width=self.window.width / 13, height=50)
 
             if not category == "Credits":
                 category_button.on_click = lambda e, category=category: self.display_category(category)
@@ -82,7 +82,7 @@ class Settings(arcade.gui.UIView):
         self.value_layout.clear()
 
         for setting in settings[category]:
-            label = arcade.gui.UILabel(text=setting, font_name="Protest Strike", font_size=28, text_color=arcade.color.WHITE )
+            label = arcade.gui.UILabel(text=setting, font_name="Roboto", font_size=28, text_color=arcade.color.WHITE )
             self.key_layout.add(label)
 
             setting_dict = settings[category][setting]
@@ -261,7 +261,7 @@ class Settings(arcade.gui.UIView):
         else:
             font_size = 12
 
-        self.credits_label = arcade.gui.UILabel(text=text, text_color=arcade.color.WHITE, font_name="Protest Strike", font_size=font_size, align="center", multiline=True)
+        self.credits_label = arcade.gui.UILabel(text=text, text_color=arcade.color.WHITE, font_name="Roboto", font_size=font_size, align="center", multiline=True)
 
         self.key_layout.add(self.credits_label)
 
