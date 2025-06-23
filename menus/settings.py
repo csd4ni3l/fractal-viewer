@@ -150,7 +150,10 @@ class Settings(arcade.gui.UIView):
             if self.settings_dict['vsync']:
                 self.window.set_vsync(True)
                 display_mode = self.window.display.get_default_screen().get_mode()
-                refresh_rate = display_mode.rate
+                if display_mode:
+                    refresh_rate = display_mode.rate
+                else:
+                    refresh_rate = 60
                 self.window.set_update_rate(1 / refresh_rate)
                 self.window.set_draw_rate(1 / refresh_rate)
 

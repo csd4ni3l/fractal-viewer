@@ -13,6 +13,8 @@ sys.excepthook = on_exception
 pyglet.resource.path.append(os.getcwd())
 pyglet.font.add_directory('./assets/fonts')
 
+__builtins__.print = lambda *args, **kwargs: logging.debug(" ".join(map(str, args)))
+
 if not log_dir in os.listdir():
     os.makedirs(log_dir)
 
@@ -69,7 +71,10 @@ window = arcade.Window(width=resolution[0], height=resolution[1], title='Fractal
 if vsync:
     window.set_vsync(True)
     display_mode = window.display.get_default_screen().get_mode()
-    refresh_rate = display_mode.rate
+    if display_mode:
+        refresh_rate = display_mode.rate
+    else:
+        refresh_rate = 60
     window.set_update_rate(1 / refresh_rate)
     window.set_draw_rate(1 / refresh_rate)
 elif not fps_limit == 0:

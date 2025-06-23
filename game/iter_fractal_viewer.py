@@ -18,6 +18,8 @@ class IterFractalViewer(arcade.gui.UIView):
         self.real_min, self.real_max, self.imag_min, self.imag_max = initial_real_imag[fractal_name] if fractal_name != "julia" else (-self.escape_radius, self.escape_radius, -self.escape_radius, self.escape_radius)
         self.max_iter = self.settings_dict.get(f"{self.fractal_name}_max_iter", 200)
         self.zoom = 1.0
+        self.zoom_start_position = ()
+        self.zoom_rect = None
 
     def on_show_view(self):
         super().on_show_view()
@@ -55,18 +57,6 @@ class IterFractalViewer(arcade.gui.UIView):
         self.back_button.on_click = lambda event: self.main_exit()
         self.anchor.add(self.back_button, anchor_x="left", anchor_y="top", align_x=5, align_y=-5)
 
-    def zoom_at(self, center_x, center_y, zoom_factor):
-        center_real = self.real_min + (center_x / self.width) * (self.real_max - self.real_min)
-        center_imag = self.imag_min + (center_y / self.height) * (self.imag_max - self.imag_min)
-
-        new_real_range = (self.real_max - self.real_min) / zoom_factor
-        new_imag_range = (self.imag_max - self.imag_min) / zoom_factor
-
-        self.real_min = center_real - new_real_range / 2
-        self.real_max = center_real + new_real_range / 2
-        self.imag_min = center_imag - new_imag_range / 2
-        self.imag_max = center_imag + new_imag_range / 2
-
     def create_image(self):
         with self.shader_program:
             self.shader_program['u_maxIter'] = int(self.max_iter)
@@ -75,26 +65,92 @@ class IterFractalViewer(arcade.gui.UIView):
             self.shader_program['u_imag_range'] = (self.imag_min, self.imag_max)
             self.shader_program.dispatch(self.fractal_image.width, self.fractal_image.height, 1, barrier=pyglet.gl.GL_ALL_BARRIER_BITS)
 
-    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> bool | None:
-        super().on_mouse_press(x, y, button, modifiers)
+    def on_key_press(self, symbol, modifiers):
+        if symbol == arcade.key.ESCAPE:
+            self.real_min, self.real_max, self.imag_min, self.imag_max = initial_real_imag[self.fractal_name] if self.fractal_name != "julia" else (-self.escape_radius, self.escape_radius, -self.escape_radius, self.escape_radius)
 
-        if button == arcade.MOUSE_BUTTON_LEFT:
-            zoom = self.settings_dict.get(f"{self.fractal_name}_zoom_increase", 2)
-        elif button == arcade.MOUSE_BUTTON_RIGHT:
-            zoom = 1 / self.settings_dict.get(f"{self.fractal_name}_zoom_increase", 2)
+            self.zoom = 1
+
+            self.zoom_label.text = f"Zoom: {self.zoom:.4f}"
+
+            self.zoom_start_position = None
+            self.zoom_rect = None
+
+            self.create_image()
+
+            self.pypresence_client.update(
+                state=f'Viewing {self.fractal_name.replace("_", " ").capitalize()}',
+                details=f'Zoom: {self.zoom:.4f}\nMax Iterations: {self.max_iter}',
+                start=self.pypresence_client.start_time
+            )
+
+    def on_mouse_drag(self, x, y, dx, dy, _buttons, _modifiers):
+        if not self.zoom_start_position:
+            self.zoom_start_position = (x, y)
+
+        x0, y0 = self.zoom_start_position
+
+        width = x - x0
+        height = y - y0
+
+        aspect = self.width / self.height
+
+        if abs(width) / abs(height or 1) > aspect:
+            adjusted_height = abs(width) / aspect
+            height = adjusted_height if height >= 0 else -adjusted_height
         else:
-            return
+            adjusted_width = abs(height) * aspect
+            width = adjusted_width if width >= 0 else -adjusted_width
 
-        self.zoom *= zoom
+        x1 = x0 + width
+        y1 = y0 + height
 
-        self.zoom_label.text = f"Zoom: {self.zoom}"
+        left = min(x0, x1)
+        right = max(x0, x1)
+        bottom = min(y0, y1)
+        top = max(y0, y1)
 
-        self.zoom_at(self.window.mouse.data["x"], self.window.mouse.data["y"], zoom)
-        self.create_image()
+        self.zoom_rect = arcade.rect.LRBT(left=left, right=right, top=top, bottom=bottom)
 
-        self.pypresence_client.update(state=f'Viewing {self.fractal_name.replace("_", " ").capitalize()}', details=f'Zoom: {self.zoom}\nMax Iterations: {self.max_iter}', start=self.pypresence_client.start_time)
+    def on_mouse_release(self, x, y, button, modifiers):
+        if self.zoom_start_position and self.zoom_rect:
+            rect = self.zoom_rect
+
+            center_x = (rect.left + rect.right) / 2
+            center_y = (rect.bottom + rect.top) / 2
+
+            center_real = self.real_min + (center_x / self.width) * (self.real_max - self.real_min)
+            center_imag = self.imag_min + (center_y / self.height) * (self.imag_max - self.imag_min)
+
+            real_span = (rect.right - rect.left) / self.width * (self.real_max - self.real_min)
+            imag_span = (rect.top - rect.bottom) / self.height * (self.imag_max - self.imag_min)
+
+            self.real_min = center_real - real_span / 2
+            self.real_max = center_real + real_span / 2
+            self.imag_min = center_imag - imag_span / 2
+            self.imag_max = center_imag + imag_span / 2
+
+            initial_real_range = initial_real_imag[self.fractal_name][1] - initial_real_imag[self.fractal_name][0]
+            new_real_range = self.real_max - self.real_min
+            self.zoom = initial_real_range / new_real_range
+
+            self.zoom_label.text = f"Zoom: {self.zoom:.4f}"
+
+            self.zoom_start_position = None
+            self.zoom_rect = None
+
+            self.create_image()
+
+            self.pypresence_client.update(
+                state=f'Viewing {self.fractal_name.replace("_", " ").capitalize()}',
+                details=f'Zoom: {self.zoom:.4f}\nMax Iterations: {self.max_iter}',
+                start=self.pypresence_client.start_time
+            )
 
     def on_draw(self):
         self.window.clear()
         self.fractal_sprite.draw()
         self.ui.draw()
+
+        if self.zoom_rect:
+            arcade.draw_rect_outline(self.zoom_rect, color=arcade.color.GRAY)
