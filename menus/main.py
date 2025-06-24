@@ -2,12 +2,13 @@ import arcade, arcade.gui, asyncio, pypresence, time, copy, json
 from utils.preload import button_texture, button_hovered_texture
 from utils.constants import big_button_style, discord_presence_id
 from utils.utils import FakePyPresence
-
+from arcade.gui.experimental.focus import UIFocusGroup
 class Main(arcade.gui.UIView):
     def __init__(self, pypresence_client=None):
         super().__init__()
 
-        self.anchor = self.add_widget(arcade.gui.UIAnchorLayout())
+        self.root = self.add_widget(UIFocusGroup())
+        self.anchor = self.root.add(arcade.gui.UIAnchorLayout())
         self.box = self.anchor.add(arcade.gui.UIBoxLayout(space_between=10), anchor_x='center', anchor_y='center')
 
         self.pypresence_client = pypresence_client
@@ -57,6 +58,8 @@ class Main(arcade.gui.UIView):
 
         self.settings_button = self.box.add(arcade.gui.UITextureButton(text="Settings", texture=button_texture, texture_hovered=button_hovered_texture, width=self.window.width / 2, height=150, style=big_button_style))
         self.settings_button.on_click = lambda event: self.settings()
+
+        self.root.detect_focusable_widgets()
 
     def play(self):
         from menus.fractal_chooser import FractalChooser

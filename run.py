@@ -7,6 +7,7 @@ import logging, datetime, os, json, sys, arcade
 from utils.utils import get_closest_resolution, print_debug_info, on_exception
 from utils.constants import log_dir, menu_background_color
 from menus.main import Main
+from arcade.experimental.controller_window import ControllerWindow
 
 sys.excepthook = on_exception
 
@@ -66,7 +67,7 @@ else:
     with open("settings.json", "w") as file:
         file.write(json.dumps(settings))
 
-window = arcade.Window(width=resolution[0], height=resolution[1], title='Fractal Viewer', samples=antialiasing, antialiasing=antialiasing > 0, fullscreen=fullscreen, vsync=vsync, resizable=False, style=style)
+window = ControllerWindow(width=resolution[0], height=resolution[1], title='Fractal Viewer', samples=antialiasing, antialiasing=antialiasing > 0, fullscreen=fullscreen, vsync=vsync, resizable=False, style=style)
 
 if vsync:
     window.set_vsync(True)

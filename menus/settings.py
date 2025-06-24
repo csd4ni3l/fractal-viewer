@@ -1,4 +1,4 @@
-import copy, pypresence, json, os
+import copy, pypresence, json
 
 import arcade, arcade.gui
 
@@ -30,7 +30,8 @@ class Settings(arcade.gui.UIView):
         self.modified_settings = {}
 
     def create_layouts(self):
-        self.anchor = self.add_widget(UIAnchorLayout(size_hint=(1, 1)))
+        self.root = self.add_widget(UIFocusGroup())
+        self.anchor = self.root.add(UIAnchorLayout(size_hint=(1, 1)))
 
         self.box = UIBoxLayout(space_between=50, align="center", vertical=False)
         self.anchor.add(self.box, anchor_x="center", anchor_y="top", align_x=10, align_y=-75)
@@ -46,7 +47,7 @@ class Settings(arcade.gui.UIView):
 
         self.create_layouts()
 
-        self.ui.push_handlers(self)
+        self.ui.push_handlers(self) # required for controller stuff
 
         self.back_button = arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='<--', style=button_style, width=100, height=50)
         self.back_button.on_click = lambda e: self.main_exit()
@@ -66,6 +67,8 @@ class Settings(arcade.gui.UIView):
                 category_button.on_click = lambda e: self.credits()
 
             self.top_box.add(category_button)
+
+        self.root.detect_focusable_widgets()
 
     def display_category(self, category):
         if hasattr(self, 'apply_button'):
@@ -135,6 +138,8 @@ class Settings(arcade.gui.UIView):
         self.apply_button = arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Apply', style=button_style, width=200, height=100)
         self.apply_button.on_click = lambda event: self.apply_settings()
         self.anchor.add(self.apply_button, anchor_x="right", anchor_y="bottom", align_x=-10, align_y=10)
+
+        self.root.detect_focusable_widgets()
 
     def apply_settings(self):
         for config_key, value in self.modified_settings.items():
@@ -208,7 +213,6 @@ class Settings(arcade.gui.UIView):
             file.write(json.dumps(self.settings_dict, indent=4))
 
     def update(self, setting=None, button_state=None, setting_type="bool"):
-        setting_dict = settings[self.current_category][setting]
         config_key = settings[self.current_category][setting]["config_key"]
 
         if setting_type == "option":
@@ -267,6 +271,8 @@ class Settings(arcade.gui.UIView):
         self.credits_label = arcade.gui.UILabel(text=text, text_color=arcade.color.WHITE, font_name="Roboto", font_size=font_size, align="center", multiline=True)
 
         self.key_layout.add(self.credits_label)
+
+        self.root.detect_focusable_widgets()
 
     def set_highlighted_style(self, element):
         element.texture = button_hovered_texture
