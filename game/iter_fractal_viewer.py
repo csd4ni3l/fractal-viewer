@@ -2,7 +2,7 @@ import arcade, arcade.gui, pyglet, json
 
 from game.shader import create_iter_calc_shader
 from utils.constants import button_style, initial_real_imag
-from utils.preload import button_texture, button_hovered_texture
+from utils.preload import button_texture, button_hovered_texture, cursor_texture
 
 class IterFractalViewer(arcade.gui.UIView):
     def __init__(self, pypresence_client, fractal_name: str):
@@ -20,9 +20,14 @@ class IterFractalViewer(arcade.gui.UIView):
         self.zoom = 1.0
         self.zoom_start_position = ()
         self.zoom_rect = None
+        self.has_controller = False
+        self.dragging_with_controller = False
 
     def on_show_view(self):
         super().on_show_view()
+        self.window.on_stick_motion = self.on_stick_motion
+        self.window.on_button_press = self.on_button_press
+        self.window.on_button_release = self.on_button_release
 
         self.shader_program, self.fractal_image = create_iter_calc_shader(
             self.fractal_name, 
@@ -57,6 +62,29 @@ class IterFractalViewer(arcade.gui.UIView):
         self.back_button.on_click = lambda event: self.main_exit()
         self.anchor.add(self.back_button, anchor_x="left", anchor_y="top", align_x=5, align_y=-5)
 
+        if self.window.get_controllers():
+            self.sprite_list = arcade.SpriteList()
+            self.cursor_sprite = arcade.Sprite(cursor_texture)
+            self.sprite_list.append(self.cursor_sprite)
+            self.has_controller = True
+
+    def on_button_press(self, controller, button_name):
+        if button_name == "a" and self.has_controller:
+            self.zoom_start_position = self.cursor_sprite.center_x, self.cursor_sprite.center_y
+            self.dragging_with_controller = True
+
+    def on_button_release(self, controller, button_name):
+        if button_name == "a" and self.dragging_with_controller:
+            self.dragging_with_controller = False
+            self.on_mouse_release(self.cursor_sprite.center_x, self.cursor_sprite.center_y, None, None)
+
+    def on_stick_motion(self, controller, name, vector):
+        if name == "leftstick":
+            self.cursor_sprite.center_x += vector.x * 5
+            self.cursor_sprite.center_y += vector.y * 5
+            if self.dragging_with_controller:
+                self.on_mouse_drag(self.cursor_sprite.center_x, self.cursor_sprite.center_y, 0, 0, None, None)
+
     def create_image(self):
         with self.shader_program:
             self.shader_program['u_maxIter'] = int(self.max_iter)
@@ -71,7 +99,7 @@ class IterFractalViewer(arcade.gui.UIView):
 
             self.zoom = 1
 
-            self.zoom_label.text = f"Zoom: {self.zoom:.4f}"
+            self.zoom_label.text = f"Zoom: {self.zoom:.2f}"
 
             self.zoom_start_position = None
             self.zoom_rect = None
@@ -80,7 +108,7 @@ class IterFractalViewer(arcade.gui.UIView):
 
             self.pypresence_client.update(
                 state=f'Viewing {self.fractal_name.replace("_", " ").capitalize()}',
-                details=f'Zoom: {self.zoom:.4f}\nMax Iterations: {self.max_iter}',
+                details=f'Zoom: {self.zoom:.2f}\nMax Iterations: {self.max_iter}',
                 start=self.pypresence_client.start_time
             )
 
@@ -152,5 +180,8 @@ class IterFractalViewer(arcade.gui.UIView):
         self.fractal_sprite.draw()
         self.ui.draw()
 
+        if self.has_controller:
+            self.sprite_list.draw()
+        
         if self.zoom_rect:
             arcade.draw_rect_outline(self.zoom_rect, color=arcade.color.GRAY)

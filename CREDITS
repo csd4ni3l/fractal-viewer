@@ -1,4 +1,10 @@
-The Roboto Black font used in this project is licensed under the Open Font License. Read assets/fonts/OFL.txt for more information.
+The cursor used for virtual controller support is from the Pixel UI pack
+by Kenney Vleugels for Kenney (www.kenney.nl)
+with help by Lynn Evers (Twitter: @EversLynn)
+Licensed (Creative Commons Zero, CC0) https://creativecommons.org/publicdomain/zero/1.0/
+
+The Roboto Black font used in this project is licensed under the Open Font License.
+Read assets/fonts/OFL.txt for more information.
 
 Huge Thanks to Python for being the programming language used in this game.
 https://www.python.org/
