@@ -76,7 +76,7 @@ class SierpinskyCarpetViewer(arcade.gui.UIView):
     def on_button_press(self, controller, name):
         if name == "a":
             self.on_mouse_press(self.cursor_sprite.left, self.cursor_sprite.bottom, arcade.MOUSE_BUTTON_LEFT, 0)
-        elif name == "b":
+        elif name == "start":
             self.main_exit()
 
     def on_stick_motion(self, controller, name, vector):
