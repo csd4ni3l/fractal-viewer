@@ -206,6 +206,39 @@ multi_mandelbar_calc = """int calculate_iters(vec2 c) {{
 }}
 """
 
+buffalo_fractal_calc = """int calculate_iters({vec2type} c) {{
+    int iters = 0;
+    {vec2type} z = {vec2type}(0.0, 0.0);
+    {floattype} R = {escape_radius};
+    while (dot(z, z) < R * R && iters < u_maxIter) {{
+        {floattype} z_squared_real = z.x * z.x - z.y * z.y;
+        {floattype} z_squared_imag = 2.0 * z.x * z.y;
+        z = {vec2type}(abs(z_squared_real) + c.x, abs(z_squared_imag) + c.y);
+        iters++;
+    }}
+    return iters;
+}}
+"""
+
+multi_buffalo_fractal_calc = """int calculate_iters(vec2 c) {{
+    int iters = 0;
+    vec2 z = vec2(0.0);
+    float n = {multi_n};
+    float R = {escape_radius};
+    while (dot(z, z) < R * R && iters < u_maxIter) {{
+        float r = length(z);
+        float theta = atan(z.y, z.x);
+        float r_n = pow(r, n);
+        float theta_n = n * theta;
+        float zn_real = r_n * cos(theta_n);
+        float zn_imag = r_n * sin(theta_n);
+        z = vec2(abs(zn_real) + c.x, abs(zn_imag) + c.y);
+        iters++;
+    }}
+    return iters;
+}}
+"""
+
 burning_ship_calc = """int calculate_iters({vec2type} c) {{
     int iters = 0;
     {vec2type} z = {vec2type}(0.0, 0.0);
@@ -374,6 +407,13 @@ def create_iter_calc_shader(fractal_type, width, height, precision="single", mul
             replacements["iter_calc_func"] = normal_julia_calc.format_map(replacements)
         else:
             replacements["iter_calc_func"] = multi_julia_calc.format_map(replacements)
+
+    elif fractal_type == "buffalo_fractal":
+        replacements["coloring_func"] = fire_coloring.format_map(replacements)
+        if int(multi_n) == 2:
+            replacements["iter_calc_func"] = buffalo_fractal_calc.format_map(replacements)
+        else:
+            replacements["iter_calc_func"] = multi_buffalo_fractal_calc.format_map(replacements)
 
     elif fractal_type == "burning_ship":
         replacements["coloring_func"] = fire_coloring.format_map(replacements)

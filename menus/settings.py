@@ -56,19 +56,16 @@ class Settings(arcade.gui.UIView):
         self.display_category(settings_start_category)
 
     def display_categories(self):
-        for category in settings:
-            category_button = arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text=category, style=button_style, width=self.window.width / 13, height=50)
-
-            if not category == "Credits":
-                category_button.on_click = lambda e, category=category: self.display_category(category)
-            else:
-                category_button.on_click = lambda e: self.credits()
-
-            self.top_box.add(category_button)
+        self.settings_dropdown = self.anchor.add(arcade.gui.UIDropdown(options=list(settings.keys()), default=settings_start_category, primary_style=dropdown_style, active_style=dropdown_style, dropdown_style=dropdown_style, width=self.window.width / 1.5, height=self.window.height / 20), anchor_x="center", anchor_y="top", align_y=-10)
+        self.settings_dropdown.on_change = lambda event: self.display_category(event.new_value)
 
         self.anchor.detect_focusable_widgets()
 
     def display_category(self, category):
+        if category == "Credits":
+            self.credits()
+            return
+
         if hasattr(self, 'apply_button'):
             self.anchor.remove(self.apply_button)
             del self.apply_button
@@ -94,7 +91,7 @@ class Settings(arcade.gui.UIView):
                 self.value_layout.add(dropdown)
 
             elif setting_dict['type'] == "bool":
-                button_layout = self.value_layout.add(arcade.gui.arcade.gui.UIBoxLayout(space_between=50, vertical=False))
+                button_layout = self.value_layout.add(arcade.gui.UIBoxLayout(space_between=50, vertical=False))
 
                 on_radiobutton = arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text="ON", style=button_style, width=150, height=50)
                 self.on_radiobuttons[setting] = on_radiobutton

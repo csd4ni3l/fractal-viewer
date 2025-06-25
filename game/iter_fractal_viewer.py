@@ -35,7 +35,7 @@ class IterFractalViewer(arcade.gui.UIView):
             int(self.settings_dict.get(f"{self.fractal_name}_escape_radius", 2)),
             self.settings_dict.get("julia_type", "Classic swirling")
         )
-
+        
         self.fractal_sprite = pyglet.sprite.Sprite(img=self.fractal_image)
 
         self.create_image()

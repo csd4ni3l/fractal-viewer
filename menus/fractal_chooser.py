@@ -16,7 +16,7 @@ class FractalChooser(arcade.gui.UIView):
 
         self.grid = self.add_widget(arcade.gui.UIGridLayout(row_count=4, column_count=3, horizontal_spacing=10, vertical_spacing=10))
         self.anchor.add(self.grid, anchor_x="center", anchor_y="center")
-
+        
     def on_show_view(self):
         super().on_show_view()
 
