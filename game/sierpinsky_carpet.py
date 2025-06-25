@@ -37,15 +37,6 @@ class SierpinskyCarpetViewer(arcade.gui.UIView):
             self.sprite_list.append(self.cursor_sprite)
             self.has_controller = True
 
-    def on_stick_motion(self, controller, name, vector):
-        if name == "leftstick":
-            self.cursor_sprite.center_x += vector.x * 5
-            self.cursor_sprite.center_y += vector.y * 5
-
-    def main_exit(self):
-        from menus.main import Main
-        self.window.show_view(Main(self.pypresence_client))
-
     def setup_ui(self):
         self.anchor = self.add_widget(arcade.gui.UIAnchorLayout(size_hint=(1, 1)))
 
@@ -85,6 +76,17 @@ class SierpinskyCarpetViewer(arcade.gui.UIView):
     def on_button_press(self, controller, name):
         if name == "a":
             self.on_mouse_press(self.cursor_sprite.left, self.cursor_sprite.bottom, arcade.MOUSE_BUTTON_LEFT, 0)
+        elif name == "b":
+            self.main_exit()
+
+    def on_stick_motion(self, controller, name, vector):
+        if name == "leftstick":
+            self.cursor_sprite.center_x += vector.x * 5
+            self.cursor_sprite.center_y += vector.y * 5
+
+    def main_exit(self):
+        from menus.main import Main
+        self.window.show_view(Main(self.pypresence_client))
 
     def on_draw(self):
         self.window.clear()

@@ -66,9 +66,11 @@ class IterFractalViewer(arcade.gui.UIView):
             self.has_controller = True
 
     def on_button_press(self, controller, button_name):
-        if button_name == "a" and self.has_controller:
+        if button_name == "a":
             self.zoom_start_position = self.cursor_sprite.center_x, self.cursor_sprite.center_y
             self.dragging_with_controller = True
+        elif button_name == "b":
+            self.main_exit()
 
     def on_button_release(self, controller, button_name):
         if button_name == "a" and self.dragging_with_controller:
