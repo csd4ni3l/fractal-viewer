@@ -12,8 +12,7 @@ class FractalChooser(arcade.gui.UIView):
         self.pypresence_client = pypresence_client
         self.iter_fractal_buttons = []
 
-        self.root = self.add_widget(UIFocusGroup())
-        self.anchor = self.root.add(arcade.gui.UIAnchorLayout(size_hint=(1, 1)))
+        self.anchor = self.add_widget(UIFocusGroup(size_hint=(1, 1)))
 
         self.grid = self.add_widget(arcade.gui.UIGridLayout(row_count=4, column_count=3, horizontal_spacing=10, vertical_spacing=10))
         self.anchor.add(self.grid, anchor_x="center", anchor_y="center")
@@ -40,7 +39,7 @@ class FractalChooser(arcade.gui.UIView):
         self.sierpinsky_carpet_button = self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text='Sierpinsky Carpet', style=button_style, width=200, height=200), row=row, column=col)
         self.sierpinsky_carpet_button.on_click = lambda event: self.sierpinsky_carpet()
 
-        self.root.detect_focusable_widgets()
+        self.anchor.detect_focusable_widgets()
 
     def main_exit(self):
         from menus.main import Main

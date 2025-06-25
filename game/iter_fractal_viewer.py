@@ -25,9 +25,6 @@ class IterFractalViewer(arcade.gui.UIView):
 
     def on_show_view(self):
         super().on_show_view()
-        self.window.on_stick_motion = self.on_stick_motion
-        self.window.on_button_press = self.on_button_press
-        self.window.on_button_release = self.on_button_release
 
         self.shader_program, self.fractal_image = create_iter_calc_shader(
             self.fractal_name, 

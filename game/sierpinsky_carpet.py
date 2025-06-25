@@ -17,9 +17,7 @@ class SierpinskyCarpetViewer(arcade.gui.UIView):
         self.zoom = 1.0
         self.click_center = (self.width / 2, self.height / 2)
         self.has_controller = False
-
-        self.window.on_stick_motion = self.on_stick_motion
-
+        
     def on_show_view(self):
         super().on_show_view()
 
