@@ -427,9 +427,9 @@ def create_iter_calc_shader(fractal_type, width, height, precision="single", mul
 
     shader_program = pyglet.graphics.shader.ComputeShaderProgram(shader_source)
 
-    julia_image = pyglet.image.Texture.create(width, height, internalformat=pyglet.gl.GL_RGBA32F)
+    iter_calc_image = pyglet.image.Texture.create(width, height, internalformat=pyglet.gl.GL_RGBA32F)
 
     uniform_location = shader_program['img_output']
-    julia_image.bind_image_texture(unit=uniform_location)
+    iter_calc_image.bind_image_texture(unit=uniform_location)
 
-    return shader_program, julia_image
+    return shader_program, iter_calc_image

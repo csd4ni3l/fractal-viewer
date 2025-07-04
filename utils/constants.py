@@ -9,6 +9,7 @@ discord_presence_id = 1365949409254441000
 
 initial_real_imag = {
     "mandelbrot": (-2.0, 1.0, -1.0, 1.0),
+    "julia": (-2.0, 1.0, -1.0, 1.0),
     "mandelbar": (-2.0, 1.0, -1.0, 1.0),
     "phoenix_fractal": (-2.0, 1.0, -1.0, 1.0),
     "lambda_fractal": (-2.0, 1.0, -1.0, 1.0),
