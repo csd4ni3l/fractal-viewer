@@ -1,5 +1,8 @@
 import pyglet
+
 from utils.constants import c_for_julia_type
+from game.preturbation import calculate_orbit
+from mpmath import mpc
 
 newton_coloring = """vec4 getColor(int color_number) {{
     vec4 value = vec4(0.0, 0.0, 0.0, 1.0);
@@ -30,9 +33,9 @@ polynomial_coloring = """vec4 getColor(int iters) {{
 """
 
 fire_coloring = """vec4 getColor(int iters) {{
-    vec4 value = vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 value = vec4(1.0, 0.0, 0.0, 1.0);
     if (iters != u_maxIter) {{
-        float t = float(iters) / float(u_maxIter);
+        float t = float(iters) / float(u_maxIter) + 0.5;
         value.r = 3.0 * t;
         value.g = 2.0 * t * t;
         value.b = t * t * t;
@@ -46,11 +49,54 @@ uniform int u_maxIter;
 uniform vec2 u_resolution;
 uniform vec2 u_real_range;
 uniform vec2 u_imag_range;
+
+uniform vec2 u_center;
+uniform sampler2D orbit;
+uniform bool usepreturbation;
+
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(location = 0, rgba32f) uniform image2D img_output;
 
 {coloring_func}
 {iter_calc_func}
+
+int calculate_iters({vec2type} pos) {{
+    int fractal_type = {fractal_type};
+    {vec2type} z = {initial_z};
+    {vec2type} c = {initial_c};
+
+    if (fractal_type != 0) {{
+        return int(fractal_iteration(z, c).x);
+    }}
+
+    int iters = 0;
+    float R = {escape_radius};
+
+    if (!usepreturbation) {{
+        while (dot(z, z) < R * R && iters < u_maxIter) {{
+            z = fractal_iteration(z, c);
+            iters++;
+        }}
+
+        return iters;
+    }}
+
+    {vec2type} delta = c - u_center;
+    {vec2type} eps = {vec2type}(0.0);
+    {vec2type} zn = {vec2type}(0, 0);
+
+    while (dot(zn, zn) < R * R && iters < u_maxIter) {{
+        vec2 Z = texelFetch(orbit, ivec2(iters, 0), 0).xy;
+        {vec2type} eps_sq = {vec2type}(eps.x * eps.x - eps.y * eps.y, 2.0 * eps.x * eps.y);
+        {vec2type} term1 = {vec2type}(2.0 * Z.x * eps.x - 2.0 * Z.y * eps.y, 2.0 * Z.x * eps.y + 2.0 * Z.y * eps.x);
+        eps = term1 + eps_sq + delta;
+        zn = Z + eps;
+
+        iters++;
+    }}
+
+    return iters;
+}}
 
 {vec2type} map_pixel({floattype} x, {floattype} y, {vec2type} resolution, {vec2type} real_range, {vec2type} imag_range) {{
     {floattype} real = real_range.x + (x / resolution.x) * (real_range.y - real_range.x);
@@ -91,172 +137,98 @@ void main() {{
 }}
 """
 
-normal_julia_calc = """int calculate_iters({vec2type} z) {{
-    int iters = 0;
-    float R = {escape_radius};
+normal_julia_calc = """
+{vec2type} fractal_iteration ({vec2type} z, {vec2type} c) {{
     int n = {multi_n};
-    {vec2type} c = {vec2type}{julia_c};
-    while (dot(z, z) < R * R && iters < u_maxIter){{
-        {floattype} xtemp = z.x * z.x - z.y * z.y;
-        z.y = 2 * z.x * z.y + c.y;
-        z.x = xtemp + c.x;
-        iters++;
-    }}
-    return iters;
+    {floattype} xtemp = z.x * z.x - z.y * z.y;
+    return {vec2type}(xtemp + c.x, 2 * z.x * z.y + c.y);
 }}
 """
 
-multi_julia_calc = """int calculate_iters(float z) {{
-    int iters = 0;
-    float R = {escape_radius};
-    float n = float({multi_n});
-    float c = float({julia_c});
+multi_julia_calc = """
+{vec2type} fractal_iteration ({vec2type} z, {vec2type} c) {{
+    {floattype} n = {floattype}({multi_n});
+    {floattype} r = length(z);
+    {floattype} theta = atan(z.y, z.x);
+    {floattype} r_pow = pow(r, n);
 
-    while (dot(z, z) < R * R && iters < u_maxIter) {{
-        float r = length(z);
-        float theta = atan(z.y, z.x);
-        float r_pow = pow(r, n);
-
-        z = vec2(r_pow * cos(n * theta), r_pow * sin(n * theta)) + c;
-
-        iters++;
-    }}
-
-    return iters;
+    return {vec2type}(r_pow * cos(n * theta), r_pow * sin(n * theta)) + c;
 }}
 """
 
-mandelbrot_calc = """int calculate_iters({vec2type} c) {{
-    int iters = 0;
-    {vec2type} z = {vec2type}(0.0, 0.0);
-    float R = {escape_radius};
-
-    while (dot(z, z) < R * R && iters < u_maxIter) {{
-        z = {vec2type}(
-            z.x * z.x - z.y * z.y + c.x,
-            2.0 * z.x * z.y + c.y
-        );
-
-        iters++;
-    }}
-
-    return iters;
+mandelbrot_calc = """
+{vec2type} fractal_iteration ({vec2type} z, {vec2type} c) {{
+    return {vec2type}(
+        z.x * z.x - z.y * z.y + c.x,
+        2.0 * z.x * z.y + c.y
+    );
 }}
 """
 
-multibrot_calc = """int calculate_iters(vec2 c) {{
-    int iters = 0;
-    vec2 z = vec2(0.0);
-    float n = {multi_n};
-    float R = {escape_radius};
+multibrot_calc = """
+{vec2type} fractal_iteration ({vec2type} z, {vec2type} c) {{
+    {floattype} n = {multi_n};
+    {floattype} r = length(z);
+    {floattype} theta = atan(z.y, z.x);
 
-    while (dot(z, z) < R * R && iters < u_maxIter) {{
-        float r = length(z);
-        float theta = atan(z.y, z.x);
+    {floattype} r_n = pow(r, n);
+    {floattype} theta_n = n * theta;
 
-        float r_n = pow(r, n);
-        float theta_n = n * theta;
+    return r_n * {vec2type}(cos(theta_n), sin(theta_n)) + c;
+}} 
+"""
 
-        z = r_n * vec2(cos(theta_n), sin(theta_n)) + c;
-
-        iters++;
-    }}
-
-    return iters;
+mandelbar_calc = """
+{vec2type} fractal_iteration ({vec2type} z, {vec2type} c) {{
+    return {vec2type}(
+        z.x * z.x - z.y * z.y + c.x,
+        -2.0 * z.x * z.y + c.y
+    );
 }}
 """
 
-mandelbar_calc = """int calculate_iters({vec2type} c) {{
-    int iters = 0;
-    {vec2type} z = {vec2type}(0.0, 0.0);
-    float R = {escape_radius};
+multi_mandelbar_calc = """
+{vec2type} fractal_iteration ({vec2type} z, {vec2type} c) {{
+    {floattype} n = {multi_n};
+    {floattype} r = length(z);
+    {floattype} theta = atan(-z.y, z.x);
 
-    while (dot(z, z) < R * R && iters < u_maxIter) {{
-        z = {vec2type}(
-            z.x * z.x - z.y * z.y + c.x,
-            -2.0 * z.x * z.y + c.y
-        );
+    {floattype} r_n = pow(r, n);
+    {floattype} theta_n = n * theta;
 
-        iters++;
-    }}
-
-    return iters;
+    return r_n * {vec2type}(cos(theta_n), sin(theta_n)) + c;
 }}
 """
 
-multi_mandelbar_calc = """int calculate_iters(vec2 c) {{
-    int iters = 0;
-    vec2 z = vec2(0.0);
-    float n = {multi_n};
-    float R = {escape_radius};
-
-    while (dot(z, z) < R * R && iters < u_maxIter) {{
-        float r = length(z);
-        float theta = atan(-z.y, z.x);
-
-        float r_n = pow(r, n);
-        float theta_n = n * theta;
-
-        z = r_n * vec2(cos(theta_n), sin(theta_n)) + c;
-
-        iters++;
-    }}
-
-    return iters;
+buffalo_fractal_calc = """
+{vec2type} fractal_iteration ({vec2type} z, {vec2type} c) {{
+    {floattype} z_squared_real = z.x * z.x - z.y * z.y;
+    {floattype} z_squared_imag = 2.0 * z.x * z.y;
+    return {vec2type}(abs(z_squared_real) + c.x, abs(z_squared_imag) + c.y);
 }}
 """
 
-buffalo_fractal_calc = """int calculate_iters({vec2type} c) {{
-    int iters = 0;
-    {vec2type} z = {vec2type}(0.0, 0.0);
-    {floattype} R = {escape_radius};
-    while (dot(z, z) < R * R && iters < u_maxIter) {{
-        {floattype} z_squared_real = z.x * z.x - z.y * z.y;
-        {floattype} z_squared_imag = 2.0 * z.x * z.y;
-        z = {vec2type}(abs(z_squared_real) + c.x, abs(z_squared_imag) + c.y);
-        iters++;
-    }}
-    return iters;
+multi_buffalo_fractal_calc = """
+{vec2type} fractal_iteration ({vec2type} z, {vec2type} c) {{
+    {floattype} n = {floattype}({multi_n});
+    {floattype} r = length(z);
+    {floattype} theta = atan(z.y, z.x);
+    {floattype} r_n = pow(r, n);
+    {floattype} theta_n = n * theta;
+    {floattype} zn_real = r_n * cos(theta_n);
+    {floattype} zn_imag = r_n * sin(theta_n);
+    return {vec2type}(abs(zn_real) + c.x, abs(zn_imag) + c.y);
 }}
 """
 
-multi_buffalo_fractal_calc = """int calculate_iters(vec2 c) {{
-    int iters = 0;
-    vec2 z = vec2(0.0);
-    float n = {multi_n};
-    float R = {escape_radius};
-    while (dot(z, z) < R * R && iters < u_maxIter) {{
-        float r = length(z);
-        float theta = atan(z.y, z.x);
-        float r_n = pow(r, n);
-        float theta_n = n * theta;
-        float zn_real = r_n * cos(theta_n);
-        float zn_imag = r_n * sin(theta_n);
-        z = vec2(abs(zn_real) + c.x, abs(zn_imag) + c.y);
-        iters++;
-    }}
-    return iters;
+burning_ship_calc = """
+{vec2type} fractal_iteration ({vec2type} z, {vec2type} c) {{
+    {floattype} xtemp = z.x * z.x - z.y * z.y + c.x;
+    return {vec2type}(xtemp, abs(2.0 * z.x * z.y) + c.y);
 }}
 """
 
-burning_ship_calc = """int calculate_iters({vec2type} c) {{
-    int iters = 0;
-    {vec2type} z = {vec2type}(0.0, 0.0);
-    float R = {escape_radius};
-
-    while (dot(z, z) < R * R && iters < u_maxIter) {{
-        {floattype} xtemp = z.x * z.x - z.y * z.y + c.x;
-        z.y = abs(2.0 * z.x * z.y) + c.y;
-        z.x = xtemp;
-
-        iters++;
-    }}
-
-    return iters;
-}}
-"""
-
-phoenix_fractal_calc = """int calculate_iters({vec2type} c) {{
+phoenix_fractal_calc = """{vec2type} fractal_iteration({vec2type} unused, {vec2type} c) {{
     int iters = 0;
     {vec2type} z = {vec2type}(0.0, 0.0);
     {vec2type} z_prev = {vec2type}(0.0, 0.0);
@@ -274,81 +246,76 @@ phoenix_fractal_calc = """int calculate_iters({vec2type} c) {{
         iters++;
     }}
 
-    return iters;
+    return {vec2type}(iters, 0);
 }}
 """
 
-lambda_fractal_calc = """int calculate_iters({vec2type} c) {{
-    int iters = 0;
-    {vec2type} z = {vec2type}(0.5, 0.0); // Try nonzero start
-    float R = {escape_radius};           // Try R = 2.0 if needed
-
-    while (dot(z, z) < R * R && iters < u_maxIter) {{
-        {vec2type} one_minus_z = {vec2type}(1.0, 1.0) - z;
-
-        {vec2type} temp = {vec2type}(
-            z.x * one_minus_z.x - z.y * one_minus_z.y,
-            z.x * one_minus_z.y + z.y * one_minus_z.x
-        );
-
-        z = {vec2type}(
-            c.x * temp.x - c.y * temp.y,
-            c.x * temp.y + c.y * temp.x
-        );
-
-        iters++;
+lambda_fractal_calc = """
+{vec2type} fractal_iteration ({vec2type} z, {vec2type} c) {{
+    if (z.x == 0) {{
+        z.x = 0.5;
     }}
 
-    return iters;
-}}
+    {vec2type} one_minus_z = {vec2type}(1.0, 1.0) - z;
+
+    {vec2type} temp = {vec2type}(
+        z.x * one_minus_z.x - z.y * one_minus_z.y,
+        z.x * one_minus_z.y + z.y * one_minus_z.x
+    );
+
+    return {vec2type}(
+        c.x * temp.x - c.y * temp.y,
+        c.x * temp.y + c.y * temp.x
+    );
+}} 
 """
 
 
-newton_fractal_calc = """vec2 cmul(vec2 a, vec2 b) {{
-    return vec2(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
+newton_fractal_calc = """{vec2type} cmul({vec2type} a, {vec2type} b) {{
+    return {vec2type}(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
 }}
 
-vec2 cdiv(vec2 a, vec2 b) {{
+{vec2type} cdiv({vec2type} a, {vec2type} b) {{
     float denom = b.x * b.x + b.y * b.y;
-    return vec2((a.x * b.x + a.y * b.y) / denom, (a.y * b.x - a.x * b.y) / denom);
+    return {vec2type}((a.x * b.x + a.y * b.y) / denom, (a.y * b.x - a.x * b.y) / denom);
 }}
 
-vec2 cpow(vec2 z, int power) {{
-    vec2 result = vec2(1.0, 0.0);
+{vec2type} cpow({vec2type} z, int power) {{
+    {vec2type} result = {vec2type}(1.0, 0.0);
     for (int i = 0; i < power; ++i) {{
         result = cmul(result, z);
     }}
     return result;
 }}
 
-vec2 func(vec2 z) {{
-    return cpow(z, 3) - vec2(1.0, 0.0);
+{vec2type} func({vec2type} z) {{
+    return cpow(z, 3) - {vec2type}(1.0, 0.0);
 }}
 
-vec2 derivative(vec2 z) {{
+{vec2type} derivative({vec2type} z) {{
     return 3.0 * cmul(z, z);
 }}
 
-int calculate_iters(vec2 z) {{
+{vec2type} fractal_iteration({vec2type} c, {vec2type} z) {{
     float tolerance = 0.000001;
-    vec2 roots[3] = vec2[](
-        vec2(1, 0),
-        vec2(-0.5, 0.866025404),
-        vec2(-0.5, -0.866025404)
+    {vec2type} roots[3] = {vec2type}[](
+        {vec2type}(1, 0),
+        {vec2type}(-0.5, 0.866025404),
+        {vec2type}(-0.5, -0.866025404)
     );
 
     for (int iters = 0; iters < u_maxIter; iters++) {{
         z -= cdiv(func(z), derivative(z));
 
         for (int i = 0; i < 3; i++) {{
-            vec2 difference = z - roots[i];
+            {vec2type} difference = z - roots[i];
             if (abs(difference.x) < tolerance && abs(difference.y) < tolerance) {{
-                return i;
+                return {vec2type}(i, 0);
             }}
         }}
     }}
 
-    return -1;
+    return {vec2type}(-1, 0);
 }}
 """
 
@@ -371,18 +338,25 @@ def create_sierpinsky_carpet_shader(width, height, precision="single"):
 
     return shader_program, sierpinsky_carpet_image
 
-def create_iter_calc_shader(fractal_type, width, height, precision="single", multi_n=2, escape_radius=2, julia_type="Classic swirling"):
+def create_iter_calc_shader(fractal_type, width, height, precision="single", multi_n=2, escape_radius=2, julia_type="Classic swirling", use_preturbation=False, preturbation_center=mpc(0, 0), max_iters=0):
     shader_source = iter_fractal_template
 
     replacements = {
         "multi_n": str(multi_n),
-        "julia_c": str(c_for_julia_type[julia_type]),
         "escape_radius": str(escape_radius),
         "vec2type": "dvec2" if int(multi_n) == 2 and precision == "double" else "vec2",
         "floattype": "double" if int(multi_n) == 2 and precision == "double" else "float"
     }
 
-    replacements["coloring_func"] = polynomial_coloring.format_map(replacements)
+    replacements["coloring_func"] = fire_coloring.format_map(replacements)
+    replacements["fractal_type"] = 0
+
+    if fractal_type == "julia":
+        replacements["initial_z"] = "pos"
+        replacements["initial_c"] = f"{replacements['vec2type']}{c_for_julia_type[julia_type]}" # this works because if its vec2, it would be vec2(..., ...) for example.
+    else:
+        replacements["initial_z"] = "vec2(0.0)"
+        replacements["initial_c"] = "pos"
 
     if fractal_type == "mandelbrot":
         if int(multi_n) == 2:
@@ -398,6 +372,7 @@ def create_iter_calc_shader(fractal_type, width, height, precision="single", mul
 
     elif fractal_type == "phoenix_fractal":
         replacements["iter_calc_func"] = phoenix_fractal_calc.format_map(replacements)
+        replacements["fractal_type"] = 1
 
     elif fractal_type == "lambda_fractal":
         replacements["iter_calc_func"] = lambda_fractal_calc.format_map(replacements)
@@ -422,14 +397,18 @@ def create_iter_calc_shader(fractal_type, width, height, precision="single", mul
     elif fractal_type == "newton_fractal":
         replacements["coloring_func"] = newton_coloring.format_map(replacements)
         replacements["iter_calc_func"] = newton_fractal_calc.format_map(replacements)
+        replacements["fractal_type"] = 2
 
     shader_source = shader_source.format_map(replacements)
 
     shader_program = pyglet.graphics.shader.ComputeShaderProgram(shader_source)
 
-    iter_calc_image = pyglet.image.Texture.create(width, height, internalformat=pyglet.gl.GL_RGBA32F)
+    fractal_image = pyglet.image.Texture.create(width, height, internalformat=pyglet.gl.GL_RGBA32F)
 
-    uniform_location = shader_program['img_output']
-    iter_calc_image.bind_image_texture(unit=uniform_location)
+    fractal_image.bind_image_texture(unit=shader_program['img_output'])
 
-    return shader_program, iter_calc_image
+    if use_preturbation:
+        orbit_image = calculate_orbit(fractal_type, preturbation_center, max_iters, multi_n, julia_type)
+        orbit_image.bind_image_texture(unit=shader_program['orbit'])
+
+    return shader_program, fractal_image

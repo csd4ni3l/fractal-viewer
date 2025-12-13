@@ -8,7 +8,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-22.04
+            platform: linux
+            python-version: "3.11"
+          - os: windows-latest
+            platform: windows
+            python-version: "3.11"
 
     steps:
       - name: Check-out repository
@@ -35,58 +41,78 @@ jobs:
           disable-plugins: tk-inter,dill-compat,eventlet,gevent,pyqt5,pyqt6,pyside2,pyside6,delvewheel,pywebview,matplotlib,spacy,enum-compat,pbr-compat,gevent,pmw-freezer,transformers,upx,kivy,options-nanny,multiprocessing,gi
           include-data-dir: assets=assets
           include-data-files: CREDITS=CREDITS
-          mode: standalone
-          output-file: FractalViewer
+          mode: onefile
+          output-file: GameName
 
-      - name: Zip Build Output
-        shell: bash
+      - name: Locate and rename executable (Linux)
+        if: matrix.os == 'ubuntu-22.04'
         run: |
-          mkdir -p zip_output
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            powershell.exe -Command "Compress-Archive -Path 'build/run.dist/*' -DestinationPath 'zip_output/FractalViewer-${{ runner.os }}.zip'"
-          else
-            cd build/run.dist
-            zip -r "../../zip_output/FractalViewer-${{ runner.os }}.zip" .
+          set -euo pipefail
+          echo "Searching for built Linux binary..."
+          # List to help debugging when paths change
+          ls -laR . | head -n 500 || true
+          BIN=$(find . -maxdepth 4 -type f -name 'GameName*' -perm -u+x | head -n1 || true)
+          if [ -z "${BIN}" ]; then
+            echo "ERROR: No Linux binary found after build"
+            exit 1
           fi
+          echo "Found: ${BIN}"
+          mkdir -p build_output
+          cp "${BIN}" build_output/GameName.bin
+          chmod +x build_output/GameName.bin
+          echo "Executable ready: build_output/GameName.bin"
+        shell: bash
 
-      - name: Upload Zipped Build Artifact
+      - name: Locate and rename executable (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          Write-Host "Searching for built Windows binary..."
+          Get-ChildItem -Recurse -File -Filter 'GameName*.exe' | Select-Object -First 1 | ForEach-Object {
+            Write-Host ("Found: " + $_.FullName)
+            New-Item -ItemType Directory -Force -Path build_output | Out-Null
+            Copy-Item $_.FullName "build_output\GameName.exe"
+            Write-Host "Executable ready: build_output\GameName.exe"
+          }
+          if (!(Test-Path build_output\GameName.exe)) {
+            Write-Error "ERROR: No Windows binary found after build"
+            exit 1
+          }
+        shell: pwsh
+
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FractalViewer-${{ runner.os }}.zip
-          path: zip_output/FractalViewer-${{ runner.os }}.zip
+          name: ${{ matrix.platform }}
+          path: build_output/GameName.*
+
   release:
-    name: Create GitHub Release
-    needs: build
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Download All Zipped Builds
+      - name: Download All Build Artifacts
         uses: actions/download-artifact@v4
         with:
           path: downloads
 
-      - name: Delete Old Release (if exists)
-        continue-on-error: true
-        run: gh release delete latest -y
+      - name: Create release (if missing) and upload artifacts to tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Delete Git tag (if exists)
-        continue-on-error: true
         run: |
-          git push origin :refs/tags/latest
-          git tag -d latest
-
-      - name: Recreate Git tag at HEAD
-        run: |
-          git tag latest
-          git push origin latest
-
-      - name: Create the new release
-        run: gh release create latest downloads/**/FractalViewer-*.zip --title "Latest Build" --notes "Most recent multi-platform builds of FractalViewer"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          set -euo pipefail
+          TAG="latest"
+          echo "Target release tag: $TAG"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; will upload assets with --clobber"
+          else
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --notes "Automated build for $TAG"
+          fi
+          # Upload the executables directly (no zip files)
+          gh release upload "$TAG" downloads/linux/GameName.bin --clobber
+          gh release upload "$TAG" downloads/windows/GameName.exe --clobber

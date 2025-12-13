@@ -1,8 +1,4 @@
-import logging, arcade, arcade.gui, sys, traceback
-
-from utils.constants import menu_background_color
-
-import pyglet.info, pyglet.event
+import logging, arcade, traceback, pyglet.display
 
 def dump_platform():
     import platform
@@ -37,29 +33,6 @@ def print_debug_info():
     logging.debug('')
     logging.debug('########################## DEBUG INFO ##########################')
     logging.debug('')
-
-class ErrorView(arcade.gui.UIView):
-    def __init__(self, message, title):
-        super().__init__()
-
-        self.message = message
-        self.title = title
-
-    def exit(self):
-        logging.fatal('Exited with error code 1.')
-        sys.exit(1)
-
-    def on_show_view(self):
-        super().on_show_view()
-
-        self.window.set_caption('Fractal Viewer - Error')
-        self.window.set_mouse_visible(True)
-        self.window.set_exclusive_mouse(False)
-        arcade.set_background_color(menu_background_color)
-
-        msgbox = arcade.gui.UIMessageBox(width=self.window.width / 2, height=self.window.height / 2, message_text=self.message, title=self.title)
-        msgbox.on_action = lambda _: self.exit()
-        self.add_widget(msgbox)
 
 def on_exception(*exc_info):
     logging.error(f"Unhandled exception:\n{''.join(traceback.format_exception(exc_info[1], limit=None))}")
