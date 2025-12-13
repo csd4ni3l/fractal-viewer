@@ -153,9 +153,9 @@ class IterFractalViewer(arcade.gui.UIView):
             )
             self.shader_program["u_real_range"] = (self.real_min, self.real_max)
             self.shader_program["u_imag_range"] = (self.imag_min, self.imag_max)
-            if False:
-                self.shader_program["u_center"] = (self.center_real, self.center_imag)
-            self.shader_program["usepreturbation"] = False
+            # TODO: fix preturbation
+            # self.shader_program["u_center"] = (self.center_real, self.center_imag)
+            # self.shader_program["usepreturbation"] = False
             self.shader_program.dispatch(
                 self.fractal_image.width,
                 self.fractal_image.height,

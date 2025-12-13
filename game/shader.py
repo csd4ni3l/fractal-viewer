@@ -33,9 +33,9 @@ polynomial_coloring = """vec4 getColor(int iters) {{
 """
 
 fire_coloring = """vec4 getColor(int iters) {{
-    vec4 value = vec4(1.0, 0.0, 0.0, 1.0);
+    vec4 value = vec4(0.0, 0.0, 0.0, 1.0);
     if (iters != u_maxIter) {{
-        float t = float(iters) / float(u_maxIter) + 0.5;
+        float t = float(iters) / float(u_maxIter);
         value.r = 3.0 * t;
         value.g = 2.0 * t * t;
         value.b = t * t * t;
@@ -348,7 +348,7 @@ def create_iter_calc_shader(fractal_type, width, height, precision="single", mul
         "floattype": "double" if int(multi_n) == 2 and precision == "double" else "float"
     }
 
-    replacements["coloring_func"] = fire_coloring.format_map(replacements)
+    replacements["coloring_func"] = polynomial_coloring.format_map(replacements)
     replacements["fractal_type"] = 0
 
     if fractal_type == "julia":
