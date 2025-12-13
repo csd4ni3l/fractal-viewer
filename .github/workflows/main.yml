@@ -42,7 +42,7 @@ jobs:
           include-data-dir: assets=assets
           include-data-files: CREDITS=CREDITS
           mode: onefile
-          output-file: GameName
+          output-file: FractalViewer
 
       - name: Locate and rename executable (Linux)
         if: matrix.os == 'ubuntu-22.04'
@@ -51,29 +51,29 @@ jobs:
           echo "Searching for built Linux binary..."
           # List to help debugging when paths change
           ls -laR . | head -n 500 || true
-          BIN=$(find . -maxdepth 4 -type f -name 'GameName*' -perm -u+x | head -n1 || true)
+          BIN=$(find . -maxdepth 4 -type f -name 'FractalViewer*' -perm -u+x | head -n1 || true)
           if [ -z "${BIN}" ]; then
             echo "ERROR: No Linux binary found after build"
             exit 1
           fi
           echo "Found: ${BIN}"
           mkdir -p build_output
-          cp "${BIN}" build_output/GameName.bin
-          chmod +x build_output/GameName.bin
-          echo "Executable ready: build_output/GameName.bin"
+          cp "${BIN}" build_output/FractalViewer.bin
+          chmod +x build_output/FractalViewer.bin
+          echo "Executable ready: build_output/FractalViewer.bin"
         shell: bash
 
       - name: Locate and rename executable (Windows)
         if: matrix.os == 'windows-latest'
         run: |
           Write-Host "Searching for built Windows binary..."
-          Get-ChildItem -Recurse -File -Filter 'GameName*.exe' | Select-Object -First 1 | ForEach-Object {
+          Get-ChildItem -Recurse -File -Filter 'FractalViewer*.exe' | Select-Object -First 1 | ForEach-Object {
             Write-Host ("Found: " + $_.FullName)
             New-Item -ItemType Directory -Force -Path build_output | Out-Null
-            Copy-Item $_.FullName "build_output\GameName.exe"
-            Write-Host "Executable ready: build_output\GameName.exe"
+            Copy-Item $_.FullName "build_output\FractalViewer.exe"
+            Write-Host "Executable ready: build_output\FractalViewer.exe"
           }
-          if (!(Test-Path build_output\GameName.exe)) {
+          if (!(Test-Path build_output\FractalViewer.exe)) {
             Write-Error "ERROR: No Windows binary found after build"
             exit 1
           }
@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.platform }}
-          path: build_output/GameName.*
+          path: build_output/FractalViewer.*
 
   release:
     runs-on: ubuntu-latest
@@ -114,5 +114,5 @@ jobs:
               --notes "Automated build for $TAG"
           fi
           # Upload the executables directly (no zip files)
-          gh release upload "$TAG" downloads/linux/GameName.bin --clobber
-          gh release upload "$TAG" downloads/windows/GameName.exe --clobber
+          gh release upload "$TAG" downloads/linux/FractalViewer.bin --clobber
+          gh release upload "$TAG" downloads/windows/FractalViewer.exe --clobber
