@@ -42,7 +42,7 @@ jobs:
         run: |
           python -m nuitka \
             --assume-yes-for-downloads \
-            --include-data-files=assets=assets \
+            --include-data-dir=assets=assets \
             --include-data-files=CREDITS=CREDITS \
             --mode=standalone \
             --nofollow-import-to="*tk*,_codecs,encodings,multiprocessing,gi" \
