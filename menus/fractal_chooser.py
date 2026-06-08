@@ -16,7 +16,7 @@ class FractalChooser(arcade.gui.UIView):
 
         self.grid = self.add_widget(arcade.gui.UIGridLayout(row_count=4, column_count=3, horizontal_spacing=10, vertical_spacing=10))
         self.anchor.add(self.grid, anchor_x="center", anchor_y="center")
-        
+
     def on_show_view(self):
         super().on_show_view()
 
@@ -29,7 +29,7 @@ class FractalChooser(arcade.gui.UIView):
         for n, fractal_name in enumerate(iter_fractals):
             row = n // 3
             col = n % 3
-            
+
             self.iter_fractal_buttons.append(self.grid.add(arcade.gui.UITextureButton(texture=button_texture, texture_hovered=button_hovered_texture, text=fractal_name.replace("_", " ").capitalize(), style=button_style, width=200, height=200), row=row, column=col))
             self.iter_fractal_buttons[-1].on_click = lambda event, fractal_name=fractal_name: self.iter_fractal(fractal_name)
 
