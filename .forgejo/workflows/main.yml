@@ -1,0 +1,80 @@
+name: Build and Release
+on: push
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: https://code.forgejo.org/actions/checkout@v4
+      - name: Set up Python
+        uses: https://code.forgejo.org/actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          architecture: x64
+          cache: pip
+          cache-dependency-path: "**/requirements*.txt"
+      - name: Update package lists and install patchelf and ccache
+        run: sudo apt update && sudo apt install -y patchelf ccache
+      - name: Configure ccache
+        run: |
+          ccache --set-config=max_size=1G
+          ccache --set-config=compression=true
+      - name: Restore ccache
+        uses: https://data.forgejo.org/actions/cache@v3
+        with:
+          path: ~/.cache/ccache
+          key: ccache-linux-py3.11-${{ github.sha }}
+          restore-keys: |
+            ccache-linux-py3.11-
+            ccache-linux-
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt nuitka
+      - name: Restore Nuitka cache
+        uses: https://data.forgejo.org/actions/cache@v3
+        with:
+          path: ~/.cache/Nuitka
+          key: nuitka-linux-py3.11-${{ github.sha }}
+          restore-keys: |
+            nuitka-linux-py3.11-
+            nuitka-linux-
+      - name: Build
+        run: |
+          python -m nuitka \
+            --assume-yes-for-downloads \
+            --include-data-files=assets=assets \
+            --include-data-files=CREDITS=CREDITS \
+            --mode=standalone \
+            --nofollow-import-to="*tk*,_codecs,encodings,multiprocessing,gi" \
+            --output-dir=build \
+            --disable-plugins=tk-inter,multiprocessing,gi \
+            run.py
+      - name: Print ccache stats
+        run: ccache --show-stats
+      - name: Zip
+        run: |
+          BUILD_DIR=$(find . -maxdepth 3 -type d -name "*.dist" | head -n 1)
+          zip -r fractal_viewer_linux.zip "$BUILD_DIR"
+      - name: Release
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          API: ${{ github.server_url }}/api/v1
+          REPO: ${{ github.repository }}
+        run: |
+          git config user.email "ci@ci" && git config user.name "CI"
+          git tag -f latest && git push -f origin latest
+          RELEASE_ID=$(curl -sf -H "Authorization: token $TOKEN" \
+            "$API/repos/$REPO/releases/tags/latest" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))" 2>/dev/null || true)
+          [ -n "$RELEASE_ID" ] && curl -sf -X DELETE \
+            -H "Authorization: token $TOKEN" \
+            "$API/repos/$REPO/releases/$RELEASE_ID"
+          RELEASE_ID=$(curl -sf -X POST \
+            -H "Authorization: token $TOKEN" -H "Content-Type: application/json" \
+            "$API/repos/$REPO/releases" \
+            -d "{\"tag_name\":\"latest\",\"name\":\"Latest Release\",\"draft\":false,\"prerelease\":false,\"body\":\"Automated build for commit ${{ github.sha }}\n\n## Downloads\n- Linux: \`fractal_viewer_linux.zip\`\n- Windows: Sorry, could not get builds working, please use Python\"}" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+          curl -sf -X POST \
+            -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" \
+            "$API/repos/$REPO/releases/$RELEASE_ID/assets?name=fractal_viewer_linux.zip" \
+            --data-binary "@fractal_viewer_linux.zip"
