@@ -54,7 +54,17 @@ jobs:
         run: ccache --show-stats
       - name: Zip
         run: |
-          zip -j fractal_viewer_linux.zip build/FractalViewer.bin
+          set -euo pipefail
+          # The onefile artifact has no extension; Nuitka only keeps a .bin copy
+          # inside the intermediate <script>.dist directory, which is not shipped.
+          BIN="build/FractalViewer"
+          if [ ! -f "$BIN" ]; then
+            BIN=$(find build -maxdepth 1 -type f \( -name "FractalViewer" -o -name "FractalViewer.bin" \) | head -n 1)
+          fi
+          test -n "$BIN" && test -f "$BIN"
+          [ "$BIN" = "build/FractalViewer" ] || mv -- "$BIN" "build/FractalViewer"
+          zip -j fractal_viewer_linux.zip "build/FractalViewer"
+          rm -rf build/*.dist build/*.build
       - name: Release
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
