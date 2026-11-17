@@ -1,6 +1,8 @@
 name: Build and Release
 
-on: push
+on:
+  push:
+    branches: ["**"]
 
 jobs:
   build:
@@ -99,19 +101,20 @@ jobs:
         with:
           path: downloads
 
-      - name: Create release (if missing) and upload artifacts to tag
+      - name: Move latest tag and publish release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           TAG="latest"
-          echo "Target release tag: $TAG"
+          echo "Target release tag: $TAG (commit $GITHUB_SHA)"
+          git tag -f "$TAG" "$GITHUB_SHA"
+          git push -f origin "refs/tags/$TAG"
+          NOTES="Automated build for commit $GITHUB_SHA"
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists; will upload assets with --clobber"
+            gh release edit "$TAG" --notes "$NOTES"
           else
-            gh release create "$TAG" \
-              --title "$TAG" \
-              --notes "Automated build for $TAG"
+            gh release create "$TAG" --title "$TAG" --notes "$NOTES" --verify-tag
           fi
           # Upload the executables directly (no zip files)
           gh release upload "$TAG" downloads/linux/FractalViewer.bin --clobber
