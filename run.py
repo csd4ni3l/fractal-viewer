@@ -11,7 +11,7 @@ pyglet.resource.path.append(script_dir)
 pyglet.font.add_directory(os.path.join(script_dir, 'assets', 'fonts'))
 
 import mpmath
-mpmath.dps = 1000
+mpmath.mp.dps = 1000
 
 from utils.utils import get_closest_resolution, print_debug_info, on_exception
 from utils.constants import log_dir, menu_background_color
