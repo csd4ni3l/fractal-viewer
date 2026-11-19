@@ -1,4 +1,4 @@
-import copy, pypresence, json
+import copy, pypresence, json, os
 
 import arcade, arcade.gui
 
@@ -249,7 +249,7 @@ class Settings(arcade.gui.UIView):
         self.key_layout.clear()
         self.value_layout.clear()
 
-        with open('CREDITS', 'r') as file:
+        with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'CREDITS'), 'r') as file:
             text = file.read()
 
         if self.window.width == 3840:
