@@ -101,21 +101,26 @@ jobs:
         with:
           path: downloads
 
-      - name: Move latest tag and publish release
+      - name: Recreate latest tag and release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           TAG="latest"
-          echo "Target release tag: $TAG (commit $GITHUB_SHA)"
-          git tag -f "$TAG" "$GITHUB_SHA"
-          git push -f origin "refs/tags/$TAG"
-          NOTES="Automated build for commit $GITHUB_SHA"
+          echo "Recreating release tag: $TAG (commit $GITHUB_SHA)"
+          # Remove the existing release and tag so the release is
+          # recreated from scratch. Force-moving the tag leaves the
+          # release dated to its original publication and can leave it
+          # behind the default branch.
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release edit "$TAG" --notes "$NOTES"
-          else
-            gh release create "$TAG" --title "$TAG" --notes "$NOTES" --verify-tag
+            gh release delete "$TAG" --yes --cleanup-tag
           fi
+          git tag -d "$TAG" >/dev/null 2>&1 || true
+          git push origin ":refs/tags/$TAG" || true
+          git tag "$TAG" "$GITHUB_SHA"
+          git push origin "refs/tags/$TAG"
+          NOTES="Automated build for commit $GITHUB_SHA"
+          gh release create "$TAG" --title "$TAG" --notes "$NOTES" --verify-tag
           # Upload the executables directly (no zip files)
           gh release upload "$TAG" downloads/linux/FractalViewer.bin --clobber
           gh release upload "$TAG" downloads/windows/FractalViewer.exe --clobber
