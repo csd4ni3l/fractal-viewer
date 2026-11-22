@@ -1,5 +1,9 @@
 name: Build and Release
-on: push
+on:
+  push:
+    paths-ignore:
+      - ".github/**"
+      - "**/README*"
 jobs:
   build:
     name: Build and Release

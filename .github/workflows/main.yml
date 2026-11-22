@@ -2,6 +2,9 @@ name: Build and Release
 
 on:
   push:
+    paths-ignore:
+      - ".forgejo/**"
+      - "**/README*"
     branches: ["**"]
 
 jobs:
